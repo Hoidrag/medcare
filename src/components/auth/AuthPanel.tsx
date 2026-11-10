@@ -4,7 +4,11 @@ import BrandLogo from '../BrandLogo'
 import AuthForm from './AuthForm'
 import SocialAuthButtons from './SocialAuthButtons'
 
-export default function AuthPanel() {
+type AuthPanelProps = {
+  onOpenDashboard: () => void
+}
+
+export default function AuthPanel({ onOpenDashboard }: AuthPanelProps) {
   const [mode, setMode] = useState<AuthMode>('login')
   const [showPassword, setShowPassword] = useState(false)
   const [notice, setNotice] = useState('')
@@ -76,6 +80,10 @@ export default function AuthPanel() {
         </p>
       </div>
       <footer className="form-footer"><span>© 2025 MedCare</span><a href="#ajutor" onClick={(event) => event.preventDefault()}>Ai nevoie de ajutor?</a></footer>
+      <button className="dashboard-preview-link" type="button" onClick={onOpenDashboard}>
+        Previzualizează dashboardul
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5" /></svg>
+      </button>
     </section>
   )
 }
