@@ -26,7 +26,7 @@ const managementItems = [
   ['Administrare', 'shield'],
 ] as const
 
-const iconPaths: Record<string, string> = {
+const iconPaths = {
   grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
   doctor: 'M8 3v3a4 4 0 0 0 8 0V3M6 3h4M14 3h4M12 10v3m-6 8a6 6 0 0 1 12 0M12 13a3 3 0 1 0 0 .01',
   patient: 'M16 20v-1a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v1M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 8h4m-2-2v4',
@@ -40,9 +40,16 @@ const iconPaths: Record<string, string> = {
   card: 'M3 5h18v14H3zM3 10h18m-14 5h4',
   settings: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.6-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.6l-.1-.2 1.6-2.8.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.6 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2Z',
   shield: 'M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Zm-3-11 2 2 4-4',
+} as const
+
+type SidebarIconName = keyof typeof iconPaths
+type SidebarNavigationItemsProps = {
+  items: ReadonlyArray<readonly [string, SidebarIconName]>
+  activeItem: string
+  onSelect: (item: string) => void
 }
 
-function SidebarIcon({ name }: { name: string }) {
+function SidebarIcon({ name }: { name: SidebarIconName }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d={iconPaths[name]} />
@@ -50,24 +57,24 @@ function SidebarIcon({ name }: { name: string }) {
   )
 }
 
+function SidebarNavigationItems({ items, activeItem, onSelect }: SidebarNavigationItemsProps) {
+  return items.map(([label, icon]) => (
+    <button
+      className={`sidebar-link${activeItem === label ? ' active' : ''}`}
+      type="button"
+      key={label}
+      onClick={() => onSelect(label)}
+      aria-current={activeItem === label ? 'page' : undefined}
+    >
+      <SidebarIcon name={icon} />
+      <span>{label}</span>
+      {activeItem === label && <span className="sidebar-chevron" aria-hidden="true">›</span>}
+    </button>
+  ))
+}
+
 export default function DashboardSidebar({ activeItem, userName, onSelect, onLogout }: DashboardSidebarProps) {
   const initials = userName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
-
-  function renderItems(items: ReadonlyArray<readonly [string, string]>) {
-    return items.map(([label, icon]) => (
-      <button
-        className={`sidebar-link${activeItem === label ? ' active' : ''}`}
-        type="button"
-        key={label}
-        onClick={() => onSelect(label)}
-        aria-current={activeItem === label ? 'page' : undefined}
-      >
-        <SidebarIcon name={icon} />
-        <span>{label}</span>
-        {activeItem === label && <span className="sidebar-chevron" aria-hidden="true">›</span>}
-      </button>
-    ))
-  }
 
   return (
     <aside className="dashboard-sidebar">
@@ -79,11 +86,11 @@ export default function DashboardSidebar({ activeItem, userName, onSelect, onLog
       </button>
       <span className="sidebar-section-label">MENIU PRINCIPAL</span>
       <nav className="sidebar-nav" aria-label="Navigare principală">
-        {renderItems(primaryItems)}
+        <SidebarNavigationItems items={primaryItems} activeItem={activeItem} onSelect={onSelect} />
       </nav>
       <span className="sidebar-section-label management-label">GESTIONARE</span>
       <nav className="sidebar-nav" aria-label="Navigare pentru gestionare">
-        {renderItems(managementItems)}
+        <SidebarNavigationItems items={managementItems} activeItem={activeItem} onSelect={onSelect} />
       </nav>
       <div className="sidebar-bottom">
         <div className="sidebar-user-avatar">{initials}</div>

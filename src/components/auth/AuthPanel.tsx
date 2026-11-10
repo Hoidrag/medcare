@@ -1,16 +1,16 @@
 import { useState, type FormEvent } from 'react'
-import { submitCredentials, type AuthUser } from '../../services/auth'
-import type { AuthMode, AuthProvider } from '../../types/auth'
+import type { AuthUser } from '../../services/auth'
+import type { AuthCredentials, AuthMode, AuthProvider } from '../../types/auth'
 import BrandLogo from '../BrandLogo'
 import AuthForm from './AuthForm'
 import SocialAuthButtons from './SocialAuthButtons'
 
 type AuthPanelProps = {
-  onAuthenticated: (user: AuthUser) => void
+  onAuthenticate: (mode: AuthMode, credentials: AuthCredentials) => Promise<AuthUser>
   startupNotice?: string
 }
 
-export default function AuthPanel({ onAuthenticated, startupNotice }: AuthPanelProps) {
+export default function AuthPanel({ onAuthenticate, startupNotice }: AuthPanelProps) {
   const [mode, setMode] = useState<AuthMode>('login')
   const [showPassword, setShowPassword] = useState(false)
   const [notice, setNotice] = useState('')
@@ -38,12 +38,11 @@ export default function AuthPanel({ onAuthenticated, startupNotice }: AuthPanelP
     }
 
     try {
-      const user = await submitCredentials(mode, {
+      await onAuthenticate(mode, {
         ...(isRegistering && typeof name === 'string' ? { name } : {}),
         email,
         password,
       })
-      onAuthenticated(user)
     } catch (error) {
       setNotice(error instanceof Error
         ? error.message
@@ -109,8 +108,8 @@ export default function AuthPanel({ onAuthenticated, startupNotice }: AuthPanelP
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2M3.5 7h9v7h-9z" /></svg>
           Datele tale sunt protejate și păstrate în siguranță.
         </p>
-        </div>
-        <footer className="form-footer"><span>© 2025 MedCare</span><a href="#ajutor" onClick={(event) => event.preventDefault()}>Ai nevoie de ajutor?</a></footer>
+      </div>
+      <footer className="form-footer"><span>© 2025 MedCare</span><a href="#ajutor" onClick={(event) => event.preventDefault()}>Ai nevoie de ajutor?</a></footer>
     </section>
   )
 }

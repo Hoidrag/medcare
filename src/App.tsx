@@ -2,93 +2,58 @@ import { useEffect, useState } from 'react'
 import AuthPanel from './components/auth/AuthPanel'
 import DashboardPage from './components/dashboard/DashboardPage'
 import WelcomePanel from './components/WelcomePanel'
-import { endSession, getCurrentUser, type AuthUser } from './services/auth'
+import { useAuth } from './hooks/useAuth'
+import type { AuthCredentials, AuthMode } from './types/auth'
 import './styles/auth-page.css'
 import './styles/dashboard.css'
 
 function App() {
+  const { user, isLoading, error, authenticate, logout } = useAuth()
   const [isDashboard, setIsDashboard] = useState(
     () => window.location.pathname === '/dashboard',
   )
-  const [isAuthReady, setIsAuthReady] = useState(false)
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [startupNotice, setStartupNotice] = useState('')
-
-  useEffect(() => {
-    let isMounted = true
-
-    getCurrentUser()
-      .then((currentUser) => {
-        if (isMounted) {
-          setUser(currentUser)
-          setIsAuthReady(true)
-
-          if (!currentUser && window.location.pathname === '/dashboard') {
-            window.history.replaceState({}, '', '/')
-            setIsDashboard(false)
-          } else if (currentUser && window.location.pathname !== '/dashboard') {
-            window.history.replaceState({}, '', '/dashboard')
-            setIsDashboard(true)
-          }
-        }
-      })
-      .catch((error: unknown) => {
-        if (isMounted) {
-          setStartupNotice(error instanceof Error
-            ? error.message
-            : 'Serviciul de autentificare nu este disponibil momentan.')
-          setIsAuthReady(true)
-
-          if (window.location.pathname === '/dashboard') {
-            window.history.replaceState({}, '', '/')
-            setIsDashboard(false)
-          }
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
 
   useEffect(() => {
     function syncRoute() {
-      if (!isAuthReady) {
+      if (isLoading) {
         setIsDashboard(window.location.pathname === '/dashboard')
         return
       }
 
-      if (window.location.pathname === '/dashboard' && !user) {
+      const requestedDashboard = window.location.pathname === '/dashboard'
+
+      if (requestedDashboard && !user) {
         window.history.replaceState({}, '', '/')
         setIsDashboard(false)
         return
       }
 
-      if (window.location.pathname !== '/dashboard' && user) {
+      if (!requestedDashboard && user) {
         window.history.replaceState({}, '', '/dashboard')
         setIsDashboard(true)
         return
       }
 
-      setIsDashboard(window.location.pathname === '/dashboard')
+      setIsDashboard(requestedDashboard)
     }
 
     window.addEventListener('popstate', syncRoute)
+    syncRoute()
     return () => window.removeEventListener('popstate', syncRoute)
-  }, [isAuthReady, user])
+  }, [isLoading, user])
 
   function navigate(path: string) {
-    if (path === '/dashboard' && !user) {
-      window.history.replaceState({}, '', '/')
-      setIsDashboard(false)
-      return
-    }
-
     window.history.pushState({}, '', path)
     setIsDashboard(path === '/dashboard')
   }
 
-  if (!isAuthReady) {
+  async function handleAuthenticate(mode: AuthMode, credentials: AuthCredentials) {
+    const authenticatedUser = await authenticate(mode, credentials)
+    navigate('/dashboard')
+    return authenticatedUser
+  }
+
+  if (isLoading) {
     return (
       <main className="auth-page auth-loading" aria-live="polite">
         <p>Se verifică sesiunea…</p>
@@ -101,8 +66,7 @@ function App() {
       <DashboardPage
         user={user}
         onLogout={async () => {
-          await endSession()
-          setUser(null)
+          await logout()
           navigate('/')
         }}
       />
@@ -113,13 +77,8 @@ function App() {
     <main className="auth-page">
       <WelcomePanel />
       <AuthPanel
-        startupNotice={startupNotice}
-        onAuthenticated={(authenticatedUser) => {
-          setUser(authenticatedUser)
-          setStartupNotice('')
-          window.history.pushState({}, '', '/dashboard')
-          setIsDashboard(true)
-        }}
+        startupNotice={error ?? undefined}
+        onAuthenticate={handleAuthenticate}
       />
     </main>
   )

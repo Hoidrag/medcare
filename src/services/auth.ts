@@ -1,4 +1,4 @@
-import type { AuthMode } from '../types/auth'
+import type { AuthCredentials, AuthMode } from '../types/auth'
 
 export type AuthUser = {
   id: string
@@ -43,7 +43,7 @@ async function readResponse<T>(response: Response): Promise<T> {
 
 export async function submitCredentials(
   mode: AuthMode,
-  credentials: { name?: string; email: string; password: string },
+  credentials: AuthCredentials,
 ): Promise<AuthUser> {
   const response = await fetch(`/api/auth/${mode === 'register' ? 'register' : 'login'}`, {
     method: 'POST',
