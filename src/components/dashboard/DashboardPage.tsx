@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { AuthUser } from '../../services/auth'
 import DashboardSidebar from './DashboardSidebar'
 import AppointmentsTable from './widgets/AppointmentsTable'
 import OverviewStats from './widgets/OverviewStats'
@@ -6,17 +7,19 @@ import PatientTrends from './widgets/PatientTrends'
 import SpecialistsPanel from './widgets/SpecialistsPanel'
 
 type DashboardPageProps = {
-  onNavigate: (path: string) => void
+  user: AuthUser
+  onLogout: () => Promise<void>
 }
 
-export default function DashboardPage({ onNavigate }: DashboardPageProps) {
+export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeItem, setActiveItem] = useState('Tablou de bord')
   const [notice, setNotice] = useState('')
   const [query, setQuery] = useState('')
   const [period, setPeriod] = useState('Săptămâna aceasta')
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const heading = activeItem === 'Tablou de bord'
-    ? 'Bun venit, Dr. Maria!'
+    ? `Bun venit, ${user.name}!`
     : activeItem
 
   function handleSelectItem(item: string) {
@@ -28,13 +31,29 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
     }
   }
 
+  async function handleLogout() {
+    setIsLoggingOut(true)
+    try {
+      await onLogout()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Nu am putut încheia sesiunea.')
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
   function handleExport() {
     setNotice('Exportul va fi disponibil după conectarea dashboardului la date reale.')
   }
 
   return (
     <main className="dashboard-page">
-      <DashboardSidebar activeItem={activeItem} onSelect={handleSelectItem} onBack={() => onNavigate('/')} />
+      <DashboardSidebar
+        activeItem={activeItem}
+        userName={user.name}
+        onSelect={handleSelectItem}
+        onLogout={handleLogout}
+      />
       <section className="dashboard-main">
         <header className="dashboard-topbar">
           <label className="dashboard-search">
@@ -43,10 +62,18 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
             <kbd>⌘ K</kbd>
           </label>
           <div className="topbar-actions">
-            <span className="demo-badge"><span /> PREVIZUALIZARE</span>
             <button type="button" className="topbar-icon" aria-label="Mesaje">✉<i /></button>
             <button type="button" className="topbar-icon" aria-label="Notificări">♧<i /></button>
-            <div className="topbar-profile"><span className="profile-avatar">MP</span><span><strong>Maria Popescu</strong><small>Administrator</small></span></div>
+            <div className="topbar-profile"><span className="profile-avatar">{user.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}</span><span><strong>{user.name}</strong><small>Cont MedCare</small></span></div>
+            <button
+              className="dashboard-logout"
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3H4.5A1.5 1.5 0 0 0 3 4.5v11A1.5 1.5 0 0 0 4.5 17H8m3-3 4-4-4-4m4 4H7" /></svg>
+              {isLoggingOut ? 'Se deconectează…' : 'Deconectare'}
+            </button>
           </div>
         </header>
 
@@ -82,9 +109,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
           <AppointmentsTable query={query} />
         </div>
       </section>
-      <button className="dashboard-back-link" type="button" onClick={() => onNavigate('/')}>
-        <span aria-hidden="true">←</span> Înapoi la autentificare
-      </button>
     </main>
   )
 }

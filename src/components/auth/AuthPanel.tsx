@@ -1,26 +1,56 @@
 import { useState, type FormEvent } from 'react'
+import { submitCredentials, type AuthUser } from '../../services/auth'
 import type { AuthMode, AuthProvider } from '../../types/auth'
 import BrandLogo from '../BrandLogo'
 import AuthForm from './AuthForm'
 import SocialAuthButtons from './SocialAuthButtons'
 
 type AuthPanelProps = {
-  onOpenDashboard: () => void
+  onAuthenticated: (user: AuthUser) => void
+  startupNotice?: string
 }
 
-export default function AuthPanel({ onOpenDashboard }: AuthPanelProps) {
+export default function AuthPanel({ onAuthenticated, startupNotice }: AuthPanelProps) {
   const [mode, setMode] = useState<AuthMode>('login')
   const [showPassword, setShowPassword] = useState(false)
   const [notice, setNotice] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const isRegistering = mode === 'register'
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setNotice(
-      isRegistering
-        ? 'Contul tău este pregătit pentru configurare. Autentificarea va fi activată într-o etapă viitoare.'
-        : 'Interfața este pregătită. Conectarea va fi activată într-o etapă viitoare.',
-    )
+    setIsSubmitting(true)
+    setNotice('')
+
+    const formData = new FormData(event.currentTarget)
+    const name = formData.get('name')
+    const email = formData.get('email')
+    const password = formData.get('password')
+
+    if (
+      typeof email !== 'string'
+      || typeof password !== 'string'
+      || (isRegistering && typeof name !== 'string')
+    ) {
+      setNotice('Verifică datele introduse și încearcă din nou.')
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      const user = await submitCredentials(mode, {
+        ...(isRegistering && typeof name === 'string' ? { name } : {}),
+        email,
+        password,
+      })
+      onAuthenticated(user)
+    } catch (error) {
+      setNotice(error instanceof Error
+        ? error.message
+        : 'Nu am putut contacta serviciul de autentificare. Verifică dacă serverul rulează.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function handleProviderSelect(provider: AuthProvider) {
@@ -66,7 +96,8 @@ export default function AuthPanel({ onOpenDashboard }: AuthPanelProps) {
         <AuthForm
           mode={mode}
           showPassword={showPassword}
-          notice={notice}
+          isSubmitting={isSubmitting}
+          notice={notice || startupNotice || ''}
           onTogglePassword={() => setShowPassword((isVisible) => !isVisible)}
           onForgotPassword={() => setNotice('Recuperarea parolei va fi disponibilă într-o etapă viitoare.')}
           onSubmit={handleSubmit}
@@ -78,12 +109,8 @@ export default function AuthPanel({ onOpenDashboard }: AuthPanelProps) {
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2M3.5 7h9v7h-9z" /></svg>
           Datele tale sunt protejate și păstrate în siguranță.
         </p>
-      </div>
-      <footer className="form-footer"><span>© 2025 MedCare</span><a href="#ajutor" onClick={(event) => event.preventDefault()}>Ai nevoie de ajutor?</a></footer>
-      <button className="dashboard-preview-link" type="button" onClick={onOpenDashboard}>
-        Previzualizează dashboardul
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5" /></svg>
-      </button>
+        </div>
+        <footer className="form-footer"><span>© 2025 MedCare</span><a href="#ajutor" onClick={(event) => event.preventDefault()}>Ai nevoie de ajutor?</a></footer>
     </section>
   )
 }

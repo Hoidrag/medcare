@@ -2,8 +2,9 @@ import BrandLogo from '../BrandLogo'
 
 type DashboardSidebarProps = {
   activeItem: string
+  userName: string
   onSelect: (item: string) => void
-  onBack: () => void
+  onLogout: () => Promise<void>
 }
 
 const primaryItems = [
@@ -49,7 +50,9 @@ function SidebarIcon({ name }: { name: string }) {
   )
 }
 
-export default function DashboardSidebar({ activeItem, onSelect, onBack }: DashboardSidebarProps) {
+export default function DashboardSidebar({ activeItem, userName, onSelect, onLogout }: DashboardSidebarProps) {
+  const initials = userName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+
   function renderItems(items: ReadonlyArray<readonly [string, string]>) {
     return items.map(([label, icon]) => (
       <button
@@ -83,9 +86,9 @@ export default function DashboardSidebar({ activeItem, onSelect, onBack }: Dashb
         {renderItems(managementItems)}
       </nav>
       <div className="sidebar-bottom">
-        <div className="sidebar-user-avatar">MP</div>
-        <div className="sidebar-user-copy"><strong>Dr. Maria Popescu</strong><span>Administrator</span></div>
-        <button className="sidebar-signout" type="button" onClick={onBack} aria-label="Înapoi la autentificare" title="Înapoi la autentificare">↗</button>
+        <div className="sidebar-user-avatar">{initials}</div>
+        <div className="sidebar-user-copy"><strong>{userName}</strong><span>Cont MedCare</span></div>
+        <button className="sidebar-signout" type="button" onClick={onLogout} aria-label="Deconectare" title="Deconectare">↗</button>
       </div>
     </aside>
   )

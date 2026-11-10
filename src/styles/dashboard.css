@@ -293,25 +293,44 @@
   gap: 11px;
 }
 
-.demo-badge {
+.dashboard-logout {
   display: inline-flex;
+  min-height: 34px;
   align-items: center;
-  gap: 6px;
-  padding: 6px 9px;
-  border: 1px solid #dcece2;
-  border-radius: 999px;
-  color: #4b8567;
-  background: #f4faf5;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: .5px;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid #e6ebe7;
+  border-radius: 7px;
+  color: #60766a;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
 }
 
-.demo-badge > span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #64b486;
+.dashboard-logout:hover:not(:disabled) {
+  border-color: #e6caca;
+  color: #a64e4e;
+  background: #fffafa;
+}
+
+.dashboard-logout:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
+.dashboard-logout svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
 }
 
 .topbar-icon {
@@ -1127,30 +1146,6 @@
   text-align: center;
 }
 
-.dashboard-back-link {
-  position: fixed;
-  right: 18px;
-  bottom: 16px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 12px;
-  border: 1px solid #dce9e0;
-  border-radius: 999px;
-  color: #557a64;
-  background: rgba(255, 255, 255, .95);
-  box-shadow: 0 4px 14px rgba(33, 71, 51, .1);
-  cursor: pointer;
-  font: inherit;
-  font-size: 10px;
-}
-
-.dashboard-back-link:hover {
-  color: #286d52;
-  background: #f7fbf8;
-}
-
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1255,9 +1250,6 @@
     grid-template-columns: minmax(0, 1.4fr) minmax(235px, .9fr);
   }
 
-  .demo-badge {
-    display: none;
-  }
 }
 
 @media (max-width: 680px) {
@@ -1405,12 +1397,6 @@
     min-width: 620px;
   }
 
-  .dashboard-back-link {
-    right: 12px;
-    bottom: 67px;
-    padding: 8px 10px;
-    font-size: 9px;
-  }
 }
 
 @media (max-width: 420px) {
@@ -1481,7 +1467,6 @@
 }
 
 .dashboard-page :is(
-  .demo-badge,
   .stat-change,
   .stat-chart-labels,
   .chart-y-labels,
@@ -1527,8 +1512,7 @@
   .primary-action,
   .period-select select,
   .chart-period select,
-  .stat-card-heading h2,
-  .dashboard-back-link
+  .stat-card-heading h2
 ) {
   font-size: 11px;
 }

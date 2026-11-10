@@ -4,6 +4,7 @@ import type { AuthMode } from '../../types/auth'
 type AuthFormProps = {
   mode: AuthMode
   showPassword: boolean
+  isSubmitting: boolean
   notice: string
   onTogglePassword: () => void
   onForgotPassword: () => void
@@ -13,6 +14,7 @@ type AuthFormProps = {
 export default function AuthForm({
   mode,
   showPassword,
+  isSubmitting,
   notice,
   onTogglePassword,
   onForgotPassword,
@@ -65,8 +67,8 @@ export default function AuthForm({
         </div>
       )}
 
-      <button className="submit-button" type="submit">
-        {isRegistering ? 'Creează contul' : 'Autentificare'}
+      <button className="submit-button" type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Se procesează…' : isRegistering ? 'Creează contul' : 'Autentificare'}
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5" /></svg>
       </button>
       {notice && <p className="form-notice" role="status">{notice}</p>}

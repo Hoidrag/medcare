@@ -388,41 +388,12 @@
   box-sizing: border-box;
 }
 
-.dashboard-preview-link {
-  position: fixed;
-  right: 20px;
-  bottom: 18px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 11px 15px;
-  border: 1px solid #d5e7dc;
-  border-radius: 999px;
-  color: #236b56;
-  background: rgba(255, 255, 255, .96);
-  box-shadow: 0 5px 18px rgba(27, 73, 55, .1);
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
-}
-
-.dashboard-preview-link:hover {
-  background: #f2f8f4;
-  box-shadow: 0 8px 22px rgba(27, 73, 55, .15);
-  transform: translateY(-2px);
-}
-
-.dashboard-preview-link svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.6;
+.auth-loading {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  color: #5f766a;
+  font-size: 14px;
 }
 
 .auth-card {
