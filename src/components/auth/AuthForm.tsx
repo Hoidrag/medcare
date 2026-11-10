@@ -27,7 +27,10 @@ export default function AuthForm({
       {isRegistering && (
         <label className="field">
           <span>Nume complet</span>
-          <input type="text" name="name" placeholder="Ex. Andreea Popescu" autoComplete="name" required />
+          <span className="input-wrap">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6.5" r="3" /><path d="M4 17a6 6 0 0 1 12 0" /></svg>
+            <input type="text" name="name" placeholder="Ex. Andreea Popescu" autoComplete="name" required />
+          </span>
         </label>
       )}
       <label className="field">
