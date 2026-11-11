@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { AuthUser } from '../../services/auth'
 import DashboardSidebar from './DashboardSidebar'
 import AppointmentsTable from './widgets/AppointmentsTable'
@@ -6,21 +6,36 @@ import OverviewStats from './widgets/OverviewStats'
 import PatientTrends from './widgets/PatientTrends'
 import SpecialistsPanel from './widgets/SpecialistsPanel'
 
+function formatCurrentDate() {
+  return new Intl.DateTimeFormat('ro-RO', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+    .format(new Date())
+    .toLocaleUpperCase('ro-RO')
+}
+
 type DashboardPageProps = {
   user: AuthUser
   onLogout: () => Promise<void>
 }
 
 export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
+  const [currentDate, setCurrentDate] = useState('')
   const [activeItem, setActiveItem] = useState('Tablou de bord')
   const [notice, setNotice] = useState('')
   const [query, setQuery] = useState('')
   const [period, setPeriod] = useState('Săptămâna aceasta')
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const heading = activeItem === 'Tablou de bord'
-    ? `Bun venit, ${user.name}!`
-    : activeItem
+  useEffect(() => {
+    setCurrentDate(formatCurrentDate())
+  }, [])
+
+  const heading =
+    activeItem === 'Tablou de bord' ? `Bun venit, ${user.name}!` : activeItem
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
@@ -36,14 +51,20 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
     try {
       await onLogout()
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Nu am putut încheia sesiunea.')
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : 'Nu am putut încheia sesiunea.',
+      )
     } finally {
       setIsLoggingOut(false)
     }
   }
 
   function handleExport() {
-    setNotice('Exportul va fi disponibil după conectarea dashboardului la date reale.')
+    setNotice(
+      'Exportul va fi disponibil după conectarea dashboardului la date reale.',
+    )
   }
 
   return (
@@ -57,21 +78,42 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
       <section className="dashboard-main">
         <header className="dashboard-topbar">
           <label className="dashboard-search">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>
-            <input id="dashboard-search" type="search" placeholder="Caută pacienți sau programări..." value={query} onChange={(event) => setQuery(event.target.value)} />
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <circle cx="8.5" cy="8.5" r="5.5" />
+              <path d="m13 13 4 4" />
+            </svg>
+            <input
+              id="dashboard-search"
+              type="search"
+              placeholder="Caută pacienți sau programări..."
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
             <kbd>⌘ K</kbd>
           </label>
           <div className="topbar-actions">
-            <button type="button" className="topbar-icon" aria-label="Mesaje">✉<i /></button>
-            <button type="button" className="topbar-icon" aria-label="Notificări">♧<i /></button>
-            <div className="topbar-profile"><span className="profile-avatar">{user.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}</span><span><strong>{user.name}</strong><small>Cont MedCare</small></span></div>
+            <div className="topbar-profile">
+              <span className="profile-avatar">
+                {user.name
+                  .split(/\s+/)
+                  .slice(0, 2)
+                  .map((part) => part[0])
+                  .join('')
+                  .toUpperCase()}
+              </span>
+              <span>
+                <strong>{user.name}</strong>
+                <small>Cont MedCare</small>
+              </span>
+            </div>
             <button
               className="dashboard-logout"
               type="button"
               onClick={handleLogout}
-              disabled={isLoggingOut}
-            >
-              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3H4.5A1.5 1.5 0 0 0 3 4.5v11A1.5 1.5 0 0 0 4.5 17H8m3-3 4-4-4-4m4 4H7" /></svg>
+              disabled={isLoggingOut}>
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M8 3H4.5A1.5 1.5 0 0 0 3 4.5v11A1.5 1.5 0 0 0 4.5 17H8m3-3 4-4-4-4m4 4H7" />
+              </svg>
               {isLoggingOut ? 'Se deconectează…' : 'Deconectare'}
             </button>
           </div>
@@ -80,16 +122,30 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
         <div className="dashboard-content">
           <div className="dashboard-heading">
             <div>
-              <span className="dashboard-eyebrow">MARȚI, 10 NOIEMBRIE 2026</span>
+              <span className="dashboard-eyebrow">
+                {currentDate}
+              </span>
               <h1>{heading}</h1>
               <p>O privire de ansamblu asupra activității clinicii tale.</p>
             </div>
             <div className="dashboard-actions">
-              <button className="secondary-action" type="button" onClick={handleExport}>Exportă raportul <span aria-hidden="true">↓</span></button>
-              <button className="primary-action" type="button" onClick={handleExport}>Generează raport <span aria-hidden="true">▤</span></button>
+              <button
+                className="secondary-action"
+                type="button"
+                onClick={handleExport}>
+                Exportă raportul <span aria-hidden="true">↓</span>
+              </button>
+              <button
+                className="primary-action"
+                type="button"
+                onClick={handleExport}>
+                Generează raport <span aria-hidden="true">▤</span>
+              </button>
               <label className="period-select">
                 <span className="visually-hidden">Perioada raportului</span>
-                <select value={period} onChange={(event) => setPeriod(event.target.value)}>
+                <select
+                  value={period}
+                  onChange={(event) => setPeriod(event.target.value)}>
                   <option>Săptămâna aceasta</option>
                   <option>Luna aceasta</option>
                   <option>Anul acesta</option>
@@ -98,9 +154,11 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
             </div>
           </div>
 
-          {notice && <p className="dashboard-notice" role="status">{notice}</p>}
-          <p className="dashboard-demo-note">Date demonstrative — nu reprezintă informații medicale reale.</p>
-
+          {notice && (
+            <p className="dashboard-notice" role="status">
+              {notice}
+            </p>
+          )}
           <OverviewStats />
           <div className="dashboard-overview-grid">
             <PatientTrends period={period} />
