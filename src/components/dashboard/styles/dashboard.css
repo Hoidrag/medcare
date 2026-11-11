@@ -1001,6 +1001,43 @@
   background: #faf5e9;
 }
 
+.availability-rose {
+  color: #a46f6c;
+  background: #fbf0ef;
+}
+
+.overview-specialty-card {
+  min-height: 100%;
+}
+
+.overview-specialty-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 18px 0 4px;
+}
+
+.overview-specialty-summary strong {
+  color: #2f493c;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.overview-specialty-summary span {
+  color: #89978f;
+  font-size: 10px;
+}
+
+.overview-specialty-bars {
+  gap: 12px;
+  padding-top: 9px;
+}
+
+.overview-specialty-legend {
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+
 .all-specialists {
   display: flex;
   width: 100%;

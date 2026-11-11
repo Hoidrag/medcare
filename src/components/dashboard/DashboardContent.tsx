@@ -5,20 +5,20 @@ import DepartmentsDirectory from './features/departments/DepartmentsDirectory'
 import DoctorsDirectory from './features/doctors/DoctorsDirectory'
 import OverviewStats from './features/overview/widgets/OverviewStats'
 import AppointmentsTable from './features/overview/widgets/AppointmentsTable'
-import PatientTrends from './features/overview/widgets/PatientTrends'
+import AppointmentsBySpecialty from './features/overview/widgets/AppointmentsBySpecialty'
 import SpecialistsPanel from './features/overview/widgets/SpecialistsPanel'
 import PatientsDirectory from './features/patients/PatientsDirectory'
 
 type DashboardContentProps = {
   activeItem: string
   query: string
-  period: string
+  onNavigate: (section: string) => void
 }
 
 export default function DashboardContent({
   activeItem,
   query,
-  period,
+  onNavigate,
 }: DashboardContentProps) {
   if (activeItem === 'Medici') return <DoctorsDirectory query={query} />
   if (activeItem === 'Pacienți') return <PatientsDirectory query={query} />
@@ -31,10 +31,10 @@ export default function DashboardContent({
     <>
       <OverviewStats />
       <div className="dashboard-overview-grid">
-        <PatientTrends period={period} />
-        <SpecialistsPanel />
+        <AppointmentsBySpecialty />
+        <SpecialistsPanel onViewAll={() => onNavigate('Medici')} />
       </div>
-      <AppointmentsTable query={query} />
+      <AppointmentsTable query={query} onViewAll={() => onNavigate('Programări')} />
     </>
   )
 }

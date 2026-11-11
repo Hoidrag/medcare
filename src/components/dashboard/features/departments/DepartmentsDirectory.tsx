@@ -1,102 +1,13 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import { demoDepartments, type DemoDepartment, type DemoDepartmentStatus } from '../shared/demoData'
 
-type DepartmentStatus = 'Activ' | 'Program limitat' | 'În amenajare'
-
-type Department = {
-  id: string
-  name: string
-  description: string
-  location: string
-  schedule: string
-  doctorCount: number
-  appointmentCount: number
-  status: DepartmentStatus
-  doctors: string[]
-  tone: 'green' | 'blue' | 'amber' | 'rose'
-}
-
-type DepartmentForm = Omit<Department, 'id' | 'doctors' | 'tone'> & {
+type DepartmentForm = Omit<DemoDepartment, 'id' | 'doctors' | 'tone'> & {
   doctors: string
 }
 
-function isDepartmentStatus(value: string): value is DepartmentStatus {
+function isDepartmentStatus(value: string): value is DemoDepartmentStatus {
   return value === 'Activ' || value === 'Program limitat' || value === 'În amenajare'
 }
-
-const initialDepartments: Department[] = [
-  {
-    id: 'DEP-001',
-    name: 'Cardiologie',
-    description: 'Prevenție, diagnostic și tratamentul afecțiunilor cardiovasculare.',
-    location: 'Corp A · Etaj 2 · Cabinetele 201–204',
-    schedule: 'Luni–Vineri, 08:00–18:00',
-    doctorCount: 4,
-    appointmentCount: 28,
-    status: 'Activ',
-    doctors: ['Dr. Andrei Popa', 'Dr. Cristina Pavel', 'Dr. Ștefan Dima'],
-    tone: 'rose',
-  },
-  {
-    id: 'DEP-002',
-    name: 'Neurologie',
-    description: 'Evaluare și îngrijire pentru afecțiuni ale sistemului nervos.',
-    location: 'Corp A · Etaj 1 · Cabinetele 105–107',
-    schedule: 'Luni–Vineri, 09:00–17:00',
-    doctorCount: 3,
-    appointmentCount: 19,
-    status: 'Activ',
-    doctors: ['Dr. Elena Marin', 'Dr. Paul Rusu'],
-    tone: 'blue',
-  },
-  {
-    id: 'DEP-003',
-    name: 'Medicină internă',
-    description: 'Consultații complexe, diagnostic și monitorizarea stării generale.',
-    location: 'Corp B · Etaj 1 · Cabinetele 110–113',
-    schedule: 'Luni–Sâmbătă, 08:30–16:30',
-    doctorCount: 5,
-    appointmentCount: 32,
-    status: 'Activ',
-    doctors: ['Dr. Radu Cernat', 'Dr. Oana Matei', 'Dr. Vlad Ilie'],
-    tone: 'green',
-  },
-  {
-    id: 'DEP-004',
-    name: 'Pediatrie',
-    description: 'Servicii medicale și consultații dedicate copiilor și adolescenților.',
-    location: 'Corp B · Etaj 2 · Cabinetele 220–223',
-    schedule: 'Luni–Vineri, 10:00–18:00',
-    doctorCount: 3,
-    appointmentCount: 16,
-    status: 'Program limitat',
-    doctors: ['Dr. Ioana Dumitru', 'Dr. Ana Stoica'],
-    tone: 'amber',
-  },
-  {
-    id: 'DEP-005',
-    name: 'Dermatologie',
-    description: 'Consultații pentru sănătatea pielii și proceduri dermatologice.',
-    location: 'Corp A · Etaj 3 · Cabinetele 305–306',
-    schedule: 'Luni–Vineri, 08:00–14:00',
-    doctorCount: 2,
-    appointmentCount: 14,
-    status: 'Activ',
-    doctors: ['Dr. Mihai Stan', 'Dr. Laura Enache'],
-    tone: 'blue',
-  },
-  {
-    id: 'DEP-006',
-    name: 'Endocrinologie',
-    description: 'Diagnostic și monitorizare pentru afecțiuni hormonale și metabolice.',
-    location: 'Corp B · Etaj 1 · Cabinetul 118',
-    schedule: 'Luni–Joi, 09:00–15:00',
-    doctorCount: 2,
-    appointmentCount: 11,
-    status: 'În amenajare',
-    doctors: ['Dr. Ana Ionescu'],
-    tone: 'amber',
-  },
-]
 
 const emptyForm: DepartmentForm = {
   name: '',
@@ -114,10 +25,10 @@ type DepartmentsDirectoryProps = {
 }
 
 export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProps) {
-  const [departments, setDepartments] = useState(initialDepartments)
+  const [departments, setDepartments] = useState<DemoDepartment[]>(demoDepartments)
   const [expandedDepartmentId, setExpandedDepartmentId] = useState<string | null>(null)
-  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
-  const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null)
+  const [editingDepartment, setEditingDepartment] = useState<DemoDepartment | null>(null)
+  const [departmentToDelete, setDepartmentToDelete] = useState<DemoDepartment | null>(null)
   const [form, setForm] = useState<DepartmentForm>(emptyForm)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formError, setFormError] = useState('')
@@ -143,7 +54,7 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
     setIsFormOpen(true)
   }
 
-  function openEditForm(department: Department) {
+  function openEditForm(department: DemoDepartment) {
     setEditingDepartment(department)
     setForm({
       name: department.name,
@@ -170,7 +81,7 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
       return
     }
 
-    const tone: Department['tone'] = editingDepartment?.tone ?? 'green'
+    const tone: DemoDepartment['tone'] = editingDepartment?.tone ?? 'green'
     const departmentData = {
       ...form,
       name: form.name.trim(),

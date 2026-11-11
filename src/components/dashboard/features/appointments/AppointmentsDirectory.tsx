@@ -1,54 +1,16 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import {
+  createDemoAppointments,
+  demoDoctors,
+  demoPatients,
+  getLocalDateValue,
+  type DemoAppointment,
+  type DemoAppointmentStatus,
+  type DemoAppointmentType,
+} from '../shared/demoData'
 
-type AppointmentStatus = 'Confirmată' | 'În așteptare' | 'Anulată'
-type AppointmentType = 'Consultație' | 'Control' | 'Investigație'
-type Appointment = {
-  id: string
-  patient: string
-  doctor: string
-  specialty: string
-  date: string
-  time: string
-  type: AppointmentType
-  status: AppointmentStatus
-}
-type AppointmentForm = Omit<Appointment, 'id'>
+type AppointmentForm = Omit<DemoAppointment, 'id' | 'age'>
 type DateFilter = 'today' | 'all'
-
-const doctors = [
-  { name: 'Dr. Andrei Popa', specialty: 'Cardiologie' },
-  { name: 'Dr. Elena Marin', specialty: 'Neurologie' },
-  { name: 'Dr. Radu Cernat', specialty: 'Medicină internă' },
-  { name: 'Dr. Ioana Dumitru', specialty: 'Pediatrie' },
-  { name: 'Dr. Mihai Stan', specialty: 'Dermatologie' },
-  { name: 'Dr. Ana Ionescu', specialty: 'Endocrinologie' },
-]
-
-const patients = [
-  'Ana Ionescu',
-  'Mihai Georgescu',
-  'Ioana Stan',
-  'Vlad Dumitrescu',
-  'Maria Popescu',
-]
-
-function getLocalDateValue(date: Date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function getInitialAppointments(): Appointment[] {
-  const today = getLocalDateValue(new Date())
-  return [
-    { id: 'PROG-001', patient: 'Ana Ionescu', doctor: 'Dr. Andrei Popa', specialty: 'Cardiologie', date: today, time: '09:30', type: 'Control', status: 'Confirmată' },
-    { id: 'PROG-002', patient: 'Mihai Georgescu', doctor: 'Dr. Elena Marin', specialty: 'Neurologie', date: today, time: '10:15', type: 'Consultație', status: 'În așteptare' },
-    { id: 'PROG-003', patient: 'Ioana Stan', doctor: 'Dr. Radu Cernat', specialty: 'Medicină internă', date: today, time: '11:00', type: 'Control', status: 'Confirmată' },
-    { id: 'PROG-004', patient: 'Vlad Dumitrescu', doctor: 'Dr. Andrei Popa', specialty: 'Cardiologie', date: today, time: '11:45', type: 'Consultație', status: 'Confirmată' },
-    { id: 'PROG-005', patient: 'Maria Popescu', doctor: 'Dr. Ioana Dumitru', specialty: 'Pediatrie', date: today, time: '13:00', type: 'Investigație', status: 'În așteptare' },
-  ]
-}
 
 function formatAppointmentDate(date: string) {
   return new Intl.DateTimeFormat('ro-RO', {
@@ -58,15 +20,15 @@ function formatAppointmentDate(date: string) {
   }).format(new Date(`${date}T12:00:00`))
 }
 
-function isAppointmentStatus(value: string): value is AppointmentStatus {
+function isAppointmentStatus(value: string): value is DemoAppointmentStatus {
   return value === 'Confirmată' || value === 'În așteptare' || value === 'Anulată'
 }
 
-function isAppointmentType(value: string): value is AppointmentType {
+function isAppointmentType(value: string): value is DemoAppointmentType {
   return value === 'Consultație' || value === 'Control' || value === 'Investigație'
 }
 
-function getStatusClass(status: AppointmentStatus) {
+function getStatusClass(status: DemoAppointmentStatus) {
   if (status === 'Confirmată') return 'confirmed'
   if (status === 'Anulată') return 'cancelled'
   return 'pending'
@@ -74,8 +36,8 @@ function getStatusClass(status: AppointmentStatus) {
 
 const emptyForm = (): AppointmentForm => ({
   patient: '',
-  doctor: doctors[0].name,
-  specialty: doctors[0].specialty,
+  doctor: demoDoctors[0].name,
+  specialty: demoDoctors[0].specialty,
   date: getLocalDateValue(new Date()),
   time: '',
   type: 'Consultație',
@@ -88,10 +50,10 @@ type AppointmentsDirectoryProps = {
 
 export default function AppointmentsDirectory({ query }: AppointmentsDirectoryProps) {
   const [today] = useState(() => getLocalDateValue(new Date()))
-  const [appointments, setAppointments] = useState(getInitialAppointments)
+  const [appointments, setAppointments] = useState(createDemoAppointments)
   const [form, setForm] = useState<AppointmentForm>(emptyForm)
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
-  const [appointmentToDelete, setAppointmentToDelete] = useState<Appointment | null>(null)
+  const [editingAppointment, setEditingAppointment] = useState<DemoAppointment | null>(null)
+  const [appointmentToDelete, setAppointmentToDelete] = useState<DemoAppointment | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formError, setFormError] = useState('')
   const [dateFilter, setDateFilter] = useState<DateFilter>('today')
@@ -120,7 +82,7 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
     setIsFormOpen(true)
   }
 
-  function openEditForm(appointment: Appointment) {
+  function openEditForm(appointment: DemoAppointment) {
     setEditingAppointment(appointment)
     setForm({
       patient: appointment.patient,
@@ -136,7 +98,7 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
   }
 
   function handleDoctorChange(doctorName: string) {
-    const doctor = doctors.find((option) => option.name === doctorName)
+    const doctor = demoDoctors.find((option) => option.name === doctorName)
     if (!doctor) return
     setForm((currentForm) => ({
       ...currentForm,
@@ -147,6 +109,12 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const patientAge = demoPatients.find((patient) => patient.name === form.patient)?.age
+    if (patientAge === undefined) {
+      setFormError('Selectează un pacient din lista demonstrativă.')
+      return
+    }
+
     const conflictingAppointment = appointments.find((appointment) =>
       appointment.id !== editingAppointment?.id
       && appointment.doctor === form.doctor
@@ -163,12 +131,12 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
     if (editingAppointment) {
       setAppointments((currentAppointments) => currentAppointments.map((appointment) =>
         appointment.id === editingAppointment.id
-          ? { ...form, id: appointment.id }
+          ? { ...form, age: patientAge, id: appointment.id }
           : appointment,
       ))
     } else {
       setAppointments((currentAppointments) => [
-        { ...form, id: `PROG-${crypto.randomUUID()}` },
+        { ...form, age: patientAge, id: `PROG-${crypto.randomUUID()}` },
         ...currentAppointments,
       ])
     }
@@ -183,7 +151,7 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
     setAppointmentToDelete(null)
   }
 
-  function updateStatus(appointment: Appointment, value: string) {
+  function updateStatus(appointment: DemoAppointment, value: string) {
     if (!isAppointmentStatus(value)) return
     setAppointments((currentAppointments) => currentAppointments.map((item) =>
       item.id === appointment.id ? { ...item, status: value } : item,
@@ -290,13 +258,13 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
                 Pacient
                 <select required value={form.patient} onChange={(event) => setForm({ ...form, patient: event.target.value })}>
                   <option value="">Selectează pacientul</option>
-                  {patients.map((patient) => <option key={patient}>{patient}</option>)}
+                  {demoPatients.map((patient) => <option key={patient.id}>{patient.name}</option>)}
                 </select>
               </label>
               <label className="patient-form-field">
                 Medic
                 <select required value={form.doctor} onChange={(event) => handleDoctorChange(event.target.value)}>
-                  {doctors.map((doctor) => <option key={doctor.name} value={doctor.name}>{doctor.name} — {doctor.specialty}</option>)}
+                  {demoDoctors.map((doctor) => <option key={doctor.name} value={doctor.name}>{doctor.name} — {doctor.specialty}</option>)}
                 </select>
               </label>
               <div className="patient-form-grid">

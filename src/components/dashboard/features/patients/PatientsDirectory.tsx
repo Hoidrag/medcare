@@ -1,30 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import { demoPatients, type DemoPatient, type DemoPatientStatus } from '../shared/demoData'
 
-type PatientStatus = 'Activ' | 'Monitorizare' | 'Externat'
+type PatientForm = Omit<DemoPatient, 'id' | 'age'> & { age: string }
 
-type Patient = {
-  id: string
-  name: string
-  age: number
-  phone: string
-  email: string
-  lastVisit: string
-  status: PatientStatus
-}
-
-type PatientForm = Omit<Patient, 'id' | 'age'> & { age: string }
-
-function isPatientStatus(value: string): value is PatientStatus {
+function isPatientStatus(value: string): value is DemoPatientStatus {
   return value === 'Activ' || value === 'Monitorizare' || value === 'Externat'
 }
-
-const demoPatients: Patient[] = [
-  { id: 'PAC-001', name: 'Ana Ionescu', age: 34, phone: '0722 123 456', email: 'ana.ionescu@example.test', lastVisit: '10 nov. 2026', status: 'Activ' },
-  { id: 'PAC-002', name: 'Mihai Georgescu', age: 52, phone: '0723 234 567', email: 'mihai.georgescu@example.test', lastVisit: '08 nov. 2026', status: 'Monitorizare' },
-  { id: 'PAC-003', name: 'Ioana Stan', age: 27, phone: '0724 345 678', email: 'ioana.stan@example.test', lastVisit: '06 nov. 2026', status: 'Activ' },
-  { id: 'PAC-004', name: 'Vlad Dumitrescu', age: 41, phone: '0725 456 789', email: 'vlad.dumitrescu@example.test', lastVisit: '02 nov. 2026', status: 'Activ' },
-  { id: 'PAC-005', name: 'Maria Popescu', age: 63, phone: '0726 567 890', email: 'maria.popescu@example.test', lastVisit: '28 oct. 2026', status: 'Externat' },
-]
 
 const emptyForm: PatientForm = {
   name: '',
@@ -40,11 +21,11 @@ type PatientsDirectoryProps = {
 }
 
 export default function PatientsDirectory({ query }: PatientsDirectoryProps) {
-  const [patients, setPatients] = useState(demoPatients)
+  const [patients, setPatients] = useState<DemoPatient[]>(demoPatients)
   const [form, setForm] = useState<PatientForm>(emptyForm)
-  const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
+  const [editingPatient, setEditingPatient] = useState<DemoPatient | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null)
+  const [patientToDelete, setPatientToDelete] = useState<DemoPatient | null>(null)
   const [formError, setFormError] = useState('')
 
   const filteredPatients = useMemo(() => {
@@ -64,7 +45,7 @@ export default function PatientsDirectory({ query }: PatientsDirectoryProps) {
     setIsFormOpen(true)
   }
 
-  function openEditForm(patient: Patient) {
+  function openEditForm(patient: DemoPatient) {
     setEditingPatient(patient)
     setForm({
       name: patient.name,

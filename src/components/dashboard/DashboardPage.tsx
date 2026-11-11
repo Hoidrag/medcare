@@ -25,7 +25,6 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeItem, setActiveItem] = useState('Tablou de bord')
   const [notice, setNotice] = useState('')
   const [query, setQuery] = useState('')
-  const [period, setPeriod] = useState('Săptămâna aceasta')
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const heading =
@@ -163,16 +162,6 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                 onClick={handleExport}>
                 Generează raport <span aria-hidden="true">▤</span>
               </button>
-              <label className="period-select">
-                <span className="visually-hidden">Perioada raportului</span>
-                <select
-                  value={period}
-                  onChange={(event) => setPeriod(event.target.value)}>
-                  <option>Săptămâna aceasta</option>
-                  <option>Luna aceasta</option>
-                  <option>Anul acesta</option>
-                </select>
-              </label>
             </div>}
           </div>
 
@@ -184,7 +173,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
           <DashboardContent
             activeItem={activeItem}
             query={query}
-            period={period}
+            onNavigate={handleSelectItem}
           />
         </div>
       </section>
