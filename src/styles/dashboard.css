@@ -1146,6 +1146,218 @@
   text-align: center;
 }
 
+.doctors-directory {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.doctors-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.doctor-summary-card {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.doctor-summary-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  color: #477d60;
+  background: #eaf4ec;
+  font-size: 17px;
+}
+
+.doctor-summary-icon.summary-green {
+  color: #548969;
+  background: #edf7ef;
+  font-size: 12px;
+}
+
+.doctor-summary-icon.summary-blue {
+  color: #578093;
+  background: #edf5f6;
+  font-size: 16px;
+}
+
+.doctor-summary-card > span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.doctor-summary-card strong {
+  color: #2f493c;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.doctor-summary-card small {
+  color: #829188;
+  font-size: 11px;
+}
+
+.doctors-list-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.doctors-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.doctors-list-heading h2 {
+  margin: 0;
+  color: #354d41;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.doctors-list-heading p {
+  margin: 5px 0 0;
+  color: #89978f;
+  font-size: 11px;
+}
+
+.doctor-specialty-filter select {
+  height: 35px;
+  max-width: 220px;
+  padding: 0 27px 0 10px;
+  border: 1px solid #e2eae5;
+  border-radius: 7px;
+  outline: 0;
+  color: #64776c;
+  background: #fff;
+  font: inherit;
+  font-size: 11px;
+}
+
+.doctor-specialty-filter select:focus {
+  border-color: #80ae91;
+  box-shadow: 0 0 0 3px rgba(80, 142, 102, .1);
+}
+
+.doctors-table-scroll {
+  overflow-x: auto;
+}
+
+.doctors-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.doctors-table th {
+  padding: 12px 14px;
+  color: #91a097;
+  background: #fbfcfb;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .45px;
+  white-space: nowrap;
+}
+
+.doctors-table td {
+  padding: 12px 14px;
+  border-top: 1px solid #f0f3f1;
+  color: #687b71;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.doctors-table tbody tr:hover {
+  background: #fcfdfc;
+}
+
+.doctor-directory-person {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.doctor-directory-person > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.doctor-directory-person strong {
+  color: #465e51;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.doctor-directory-person small {
+  color: #96a39b;
+  font-size: 10px;
+}
+
+.doctor-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #568366;
+  background: #f0f7f1;
+  font-size: 10px;
+}
+
+.doctor-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.doctor-status-blue {
+  color: #608598;
+  background: #eff5f7;
+}
+
+.doctor-status-amber {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.doctor-status-rose {
+  color: #a46f6c;
+  background: #fbf0ef;
+}
+
+.doctor-appointment-count {
+  display: inline-grid;
+  min-width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 8px;
+  color: #4c795e;
+  background: #eff6f0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.doctors-demo-note {
+  padding: 0 20px 14px;
+  margin: 0;
+  color: #98a49d;
+  font-size: 10px;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1346,6 +1558,50 @@
 
   .dashboard-actions .period-select {
     margin-left: auto;
+  }
+
+  .doctors-summary {
+    gap: 8px;
+  }
+
+  .doctor-summary-card {
+    min-height: 72px;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .doctor-summary-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .doctor-summary-card strong {
+    font-size: 19px;
+  }
+
+  .doctor-summary-card small {
+    font-size: 10px;
+  }
+
+  .doctors-list-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .doctor-specialty-filter,
+  .doctor-specialty-filter select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .doctors-table {
+    min-width: 760px;
+  }
+
+  .doctors-demo-note {
+    padding-right: 15px;
+    padding-left: 15px;
   }
 
   .overview-stats {

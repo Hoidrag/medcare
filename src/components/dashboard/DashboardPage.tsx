@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { AuthUser } from '../../services/auth'
 import DashboardSidebar from './DashboardSidebar'
+import DoctorsDirectory from './DoctorsDirectory'
 import AppointmentsTable from './widgets/AppointmentsTable'
 import OverviewStats from './widgets/OverviewStats'
 import PatientTrends from './widgets/PatientTrends'
@@ -39,7 +40,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord') {
+    if (item !== 'Tablou de bord' && item !== 'Medici') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -85,7 +86,9 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
             <input
               id="dashboard-search"
               type="search"
-              placeholder="Caută pacienți sau programări..."
+              placeholder={activeItem === 'Medici'
+                ? 'Caută medic sau specialitate...'
+                : 'Caută pacienți sau programări...'}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -126,9 +129,13 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                 {currentDate}
               </span>
               <h1>{heading}</h1>
-              <p>O privire de ansamblu asupra activității clinicii tale.</p>
+              <p>
+                {activeItem === 'Medici'
+                  ? 'Explorează echipa medicală și disponibilitatea specialiștilor.'
+                  : 'O privire de ansamblu asupra activității clinicii tale.'}
+              </p>
             </div>
-            <div className="dashboard-actions">
+            {activeItem === 'Tablou de bord' && <div className="dashboard-actions">
               <button
                 className="secondary-action"
                 type="button"
@@ -151,7 +158,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                   <option>Anul acesta</option>
                 </select>
               </label>
-            </div>
+            </div>}
           </div>
 
           {notice && (
@@ -159,12 +166,18 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
               {notice}
             </p>
           )}
-          <OverviewStats />
-          <div className="dashboard-overview-grid">
-            <PatientTrends period={period} />
-            <SpecialistsPanel />
-          </div>
-          <AppointmentsTable query={query} />
+          {activeItem === 'Medici' ? (
+            <DoctorsDirectory query={query} />
+          ) : (
+            <>
+              <OverviewStats />
+              <div className="dashboard-overview-grid">
+                <PatientTrends period={period} />
+                <SpecialistsPanel />
+              </div>
+              <AppointmentsTable query={query} />
+            </>
+          )}
         </div>
       </section>
     </main>
