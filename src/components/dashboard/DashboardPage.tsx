@@ -1,16 +1,8 @@
 import { useState } from 'react'
 import type { AuthUser } from '../../services/auth'
-import DashboardSidebar from './DashboardSidebar'
-import DoctorsDirectory from './DoctorsDirectory'
-import PatientsDirectory from './PatientsDirectory'
-import AppointmentsDirectory from './AppointmentsDirectory'
-import DepartmentsDirectory from './DepartmentsDirectory'
-import AnalyticsReports from './AnalyticsReports'
-import BillingInsurance from './BillingInsurance'
-import AppointmentsTable from './widgets/AppointmentsTable'
-import OverviewStats from './widgets/OverviewStats'
-import PatientTrends from './widgets/PatientTrends'
-import SpecialistsPanel from './widgets/SpecialistsPanel'
+import DashboardContent from './DashboardContent'
+import DashboardSidebar from './layout/DashboardSidebar'
+import './styles/dashboard.css'
 
 function formatCurrentDate() {
   return new Intl.DateTimeFormat('ro-RO', {
@@ -189,28 +181,11 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
               {notice}
             </p>
           )}
-          {activeItem === 'Medici' ? (
-            <DoctorsDirectory query={query} />
-          ) : activeItem === 'Pacienți' ? (
-            <PatientsDirectory query={query} />
-          ) : activeItem === 'Programări' ? (
-            <AppointmentsDirectory query={query} />
-          ) : activeItem === 'Departamente' ? (
-            <DepartmentsDirectory query={query} />
-          ) : activeItem === 'Analize și rapoarte' ? (
-            <AnalyticsReports query={query} />
-          ) : activeItem === 'Facturare și asigurări' ? (
-            <BillingInsurance query={query} />
-          ) : (
-            <>
-              <OverviewStats />
-              <div className="dashboard-overview-grid">
-                <PatientTrends period={period} />
-                <SpecialistsPanel />
-              </div>
-              <AppointmentsTable query={query} />
-            </>
-          )}
+          <DashboardContent
+            activeItem={activeItem}
+            query={query}
+            period={period}
+          />
         </div>
       </section>
     </main>

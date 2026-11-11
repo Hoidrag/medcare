@@ -5,7 +5,6 @@ import WelcomePanel from './components/WelcomePanel'
 import { useAuth } from './hooks/useAuth'
 import type { AuthCredentials, AuthMode } from './types/auth'
 import './styles/auth-page.css'
-import './styles/dashboard.css'
 
 function App() {
   const { user, isLoading, error, authenticate, logout } = useAuth()
