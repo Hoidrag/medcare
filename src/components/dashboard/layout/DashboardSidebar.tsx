@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import BrandLogo from '../../BrandLogo'
 
 type DashboardSidebarProps = {
@@ -74,24 +75,62 @@ function SidebarNavigationItems({ items, activeItem, onSelect }: SidebarNavigati
 }
 
 export default function DashboardSidebar({ activeItem, userName, onSelect, onLogout }: DashboardSidebarProps) {
+  const [menuQuery, setMenuQuery] = useState('')
   const initials = userName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+  const normalizedMenuQuery = menuQuery.trim().toLocaleLowerCase('ro')
+  const matchesMenuItem = ([label]: readonly [string, SidebarIconName]) =>
+    label.toLocaleLowerCase('ro').includes(normalizedMenuQuery)
+  const filteredPrimaryItems = primaryItems.filter(matchesMenuItem)
+  const filteredManagementItems = managementItems.filter(matchesMenuItem)
+  const hasMenuResults = filteredPrimaryItems.length > 0 || filteredManagementItems.length > 0
+
+  function handleSelectMenuItem(item: string) {
+    setMenuQuery('')
+    onSelect(item)
+  }
 
   return (
     <aside className="dashboard-sidebar">
       <div className="dashboard-brand"><BrandLogo /></div>
-      <button className="sidebar-search" type="button" onClick={() => document.getElementById('dashboard-search')?.focus()}>
+      <label className="sidebar-search">
         <SidebarIcon name="patient" />
-        <span>Caută în meniu</span>
-        <kbd>⌘ K</kbd>
-      </button>
-      <span className="sidebar-section-label">MENIU PRINCIPAL</span>
-      <nav className="sidebar-nav" aria-label="Navigare principală">
-        <SidebarNavigationItems items={primaryItems} activeItem={activeItem} onSelect={onSelect} />
-      </nav>
-      <span className="sidebar-section-label management-label">GESTIONARE</span>
-      <nav className="sidebar-nav" aria-label="Navigare pentru gestionare">
-        <SidebarNavigationItems items={managementItems} activeItem={activeItem} onSelect={onSelect} />
-      </nav>
+        <input
+          type="search"
+          aria-label="Caută o secțiune din meniu"
+          placeholder="Caută în meniu"
+          value={menuQuery}
+          onChange={(event) => setMenuQuery(event.target.value)}
+        />
+        {menuQuery && (
+          <button
+            type="button"
+            className="sidebar-search-clear"
+            aria-label="Șterge căutarea din meniu"
+            onClick={() => setMenuQuery('')}
+          >
+            ×
+          </button>
+        )}
+      </label>
+      {filteredPrimaryItems.length > 0 && (
+        <>
+          <span className="sidebar-section-label">MENIU PRINCIPAL</span>
+          <nav className="sidebar-nav" aria-label="Navigare principală">
+            <SidebarNavigationItems items={filteredPrimaryItems} activeItem={activeItem} onSelect={handleSelectMenuItem} />
+          </nav>
+        </>
+      )}
+      {filteredManagementItems.length > 0 && (
+        <>
+          <span className="sidebar-section-label management-label">GESTIONARE</span>
+          <nav className="sidebar-nav" aria-label="Navigare pentru gestionare">
+            <SidebarNavigationItems items={filteredManagementItems} activeItem={activeItem} onSelect={handleSelectMenuItem} />
+          </nav>
+        </>
+      )}
+      {!hasMenuResults && (
+        <p className="sidebar-search-empty" role="status">Nicio secțiune găsită.</p>
+      )}
       <div className="sidebar-bottom">
         <div className="sidebar-user-avatar">{initials}</div>
         <div className="sidebar-user-copy"><strong>{userName}</strong><span>Cont MedCare</span></div>
