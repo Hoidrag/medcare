@@ -4,6 +4,7 @@ import DashboardSidebar from './DashboardSidebar'
 import DoctorsDirectory from './DoctorsDirectory'
 import PatientsDirectory from './PatientsDirectory'
 import AppointmentsDirectory from './AppointmentsDirectory'
+import DepartmentsDirectory from './DepartmentsDirectory'
 import AppointmentsTable from './widgets/AppointmentsTable'
 import OverviewStats from './widgets/OverviewStats'
 import PatientTrends from './widgets/PatientTrends'
@@ -38,7 +39,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări') {
+    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -91,6 +92,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                     ? 'Caută pacient după nume sau contact...'
                     : activeItem === 'Programări'
                       ? 'Caută pacient, medic sau tip de vizită...'
+                      : activeItem === 'Departamente'
+                        ? 'Caută departament, medic sau locație...'
                     : 'Caută pacienți sau programări...'
               }
               value={query}
@@ -140,6 +143,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                     ? 'Gestionează registrul și datele de contact ale pacienților.'
                     : activeItem === 'Programări'
                       ? 'Planifică și urmărește consultațiile din clinică.'
+                      : activeItem === 'Departamente'
+                        ? 'Explorează specialitățile, echipele și organizarea clinicii.'
                     : 'O privire de ansamblu asupra activității clinicii tale.'}
               </p>
             </div>
@@ -180,6 +185,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
             <PatientsDirectory query={query} />
           ) : activeItem === 'Programări' ? (
             <AppointmentsDirectory query={query} />
+          ) : activeItem === 'Departamente' ? (
+            <DepartmentsDirectory query={query} />
           ) : (
             <>
               <OverviewStats />

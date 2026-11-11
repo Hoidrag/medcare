@@ -10,6 +10,10 @@
   font-size: 13px;
 }
 
+.departments-grid {
+  grid-template-columns: 1fr;
+}
+
 .dashboard-sidebar {
   position: sticky;
   top: 0;
@@ -1651,7 +1655,8 @@
 }
 
 .patient-form-field input,
-.patient-form-field select {
+.patient-form-field select,
+.patient-form-field textarea {
   width: 100%;
   height: 38px;
   padding: 0 10px;
@@ -1665,8 +1670,16 @@
   font-weight: 400;
 }
 
+.patient-form-field textarea {
+  height: auto;
+  min-height: 72px;
+  padding-top: 9px;
+  resize: vertical;
+}
+
 .patient-form-field input:focus,
-.patient-form-field select:focus {
+.patient-form-field select:focus,
+.patient-form-field textarea:focus {
   border-color: #80ae91;
   box-shadow: 0 0 0 3px rgba(80, 142, 102, .1);
 }
@@ -1958,6 +1971,302 @@
   font-size: 10px;
 }
 
+.departments-directory {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.departments-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.department-summary-card {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.department-summary-icon,
+.department-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #477d60;
+  background: #eaf4ec;
+}
+
+.department-summary-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 17px;
+}
+
+.department-summary-icon.summary-green {
+  color: #548969;
+  background: #edf7ef;
+  font-size: 12px;
+}
+
+.department-summary-icon.summary-blue {
+  color: #578093;
+  background: #edf5f6;
+}
+
+.department-summary-icon.summary-amber {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.department-summary-card > span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.department-summary-card strong {
+  color: #2f493c;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.department-summary-card small {
+  color: #829188;
+  font-size: 11px;
+}
+
+.departments-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 1px;
+}
+
+.departments-list-heading h2 {
+  margin: 0;
+  color: #354d41;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.departments-list-heading p {
+  margin: 5px 0 0;
+  color: #89978f;
+  font-size: 11px;
+}
+
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.department-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.department-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.department-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  font-size: 17px;
+}
+
+.department-icon-blue {
+  color: #578093;
+  background: #edf5f6;
+}
+
+.department-icon-amber {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.department-icon-rose {
+  color: #a46f6c;
+  background: #fbf0ef;
+}
+
+.department-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  color: #568366;
+  background: #f0f7f1;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.department-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.department-status-limited {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.department-status-setup {
+  color: #608598;
+  background: #eff5f7;
+}
+
+.department-card h3 {
+  margin: 13px 0 5px;
+  color: #344c40;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.department-description {
+  min-height: 36px;
+  margin: 0;
+  color: #84938a;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.department-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px 0;
+  margin-top: 12px;
+  border-top: 1px solid #f0f3f1;
+  border-bottom: 1px solid #f0f3f1;
+}
+
+.department-metrics span {
+  display: grid;
+  gap: 3px;
+}
+
+.department-metrics strong {
+  color: #405b4b;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.department-metrics small {
+  color: #94a198;
+  font-size: 10px;
+}
+
+.department-meta {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.department-meta span {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: #74857b;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.department-meta i {
+  color: #689277;
+  font-size: 13px;
+  font-style: normal;
+}
+
+.department-doctors {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #f5f9f6;
+}
+
+.department-doctors strong {
+  color: #476453;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.department-doctors p {
+  margin: 5px 0 0;
+  color: #7d8c83;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.department-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-top: 10px;
+  margin-top: auto;
+  border-top: 1px solid #f0f3f1;
+}
+
+.department-card-actions > button,
+.department-card-actions > span > button {
+  padding: 6px 7px;
+  border: 0;
+  border-radius: 6px;
+  color: #527a61;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+
+.department-card-actions > button {
+  padding-left: 0;
+  font-weight: 600;
+}
+
+.department-card-actions > button:hover,
+.department-card-actions > span > button:hover {
+  background: #f3f8f4;
+}
+
+.department-card-actions > span {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.department-card-actions > span > .department-delete-action {
+  color: #a6605e;
+}
+
+.departments-empty {
+  padding: 30px 16px;
+  color: #87958e;
+  text-align: center;
+}
+
+.departments-demo-note {
+  margin: -4px 0 0;
+  color: #98a49d;
+  font-size: 10px;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -2191,6 +2500,39 @@
 
   .patients-summary {
     gap: 8px;
+  }
+
+  .departments-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .department-summary-card {
+    min-height: 72px;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .department-summary-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .department-summary-card strong {
+    font-size: 19px;
+  }
+
+  .department-summary-card small {
+    font-size: 10px;
+  }
+
+  .departments-list-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .departments-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .appointments-summary {
