@@ -6,6 +6,7 @@ import PatientsDirectory from './PatientsDirectory'
 import AppointmentsDirectory from './AppointmentsDirectory'
 import DepartmentsDirectory from './DepartmentsDirectory'
 import AnalyticsReports from './AnalyticsReports'
+import BillingInsurance from './BillingInsurance'
 import AppointmentsTable from './widgets/AppointmentsTable'
 import OverviewStats from './widgets/OverviewStats'
 import PatientTrends from './widgets/PatientTrends'
@@ -40,7 +41,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente' && item !== 'Analize și rapoarte') {
+    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente' && item !== 'Analize și rapoarte' && item !== 'Facturare și asigurări') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -97,6 +98,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                         ? 'Caută departament, medic sau locație...'
                         : activeItem === 'Analize și rapoarte'
                           ? 'Caută medic sau departament în rapoarte...'
+                          : activeItem === 'Facturare și asigurări'
+                            ? 'Caută factură, pacient sau dosar...'
                     : 'Caută pacienți sau programări...'
               }
               value={query}
@@ -150,6 +153,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                         ? 'Explorează specialitățile, echipele și organizarea clinicii.'
                         : activeItem === 'Analize și rapoarte'
                           ? 'Urmărește indicatorii clinici și explorează activitatea agregată.'
+                          : activeItem === 'Facturare și asigurări'
+                            ? 'Urmărește facturile și solicitările demonstrative de decontare.'
                     : 'O privire de ansamblu asupra activității clinicii tale.'}
               </p>
             </div>
@@ -194,6 +199,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
             <DepartmentsDirectory query={query} />
           ) : activeItem === 'Analize și rapoarte' ? (
             <AnalyticsReports query={query} />
+          ) : activeItem === 'Facturare și asigurări' ? (
+            <BillingInsurance query={query} />
           ) : (
             <>
               <OverviewStats />
