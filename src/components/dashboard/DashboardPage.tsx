@@ -3,6 +3,7 @@ import type { AuthUser } from '../../services/auth'
 import DashboardSidebar from './DashboardSidebar'
 import DoctorsDirectory from './DoctorsDirectory'
 import PatientsDirectory from './PatientsDirectory'
+import AppointmentsDirectory from './AppointmentsDirectory'
 import AppointmentsTable from './widgets/AppointmentsTable'
 import OverviewStats from './widgets/OverviewStats'
 import PatientTrends from './widgets/PatientTrends'
@@ -37,7 +38,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți') {
+    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -88,6 +89,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                   ? 'Caută medic sau specialitate...'
                   : activeItem === 'Pacienți'
                     ? 'Caută pacient după nume sau contact...'
+                    : activeItem === 'Programări'
+                      ? 'Caută pacient, medic sau tip de vizită...'
                     : 'Caută pacienți sau programări...'
               }
               value={query}
@@ -135,6 +138,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                   ? 'Explorează echipa medicală și disponibilitatea specialiștilor.'
                   : activeItem === 'Pacienți'
                     ? 'Gestionează registrul și datele de contact ale pacienților.'
+                    : activeItem === 'Programări'
+                      ? 'Planifică și urmărește consultațiile din clinică.'
                     : 'O privire de ansamblu asupra activității clinicii tale.'}
               </p>
             </div>
@@ -173,6 +178,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
             <DoctorsDirectory query={query} />
           ) : activeItem === 'Pacienți' ? (
             <PatientsDirectory query={query} />
+          ) : activeItem === 'Programări' ? (
+            <AppointmentsDirectory query={query} />
           ) : (
             <>
               <OverviewStats />
