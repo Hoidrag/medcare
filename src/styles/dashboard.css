@@ -1358,6 +1358,348 @@
   font-size: 10px;
 }
 
+.patients-directory {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.patients-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.patient-summary-card {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.patient-summary-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  color: #477d60;
+  background: #eaf4ec;
+  font-size: 18px;
+}
+
+.patient-summary-icon.summary-green {
+  color: #548969;
+  background: #edf7ef;
+  font-size: 12px;
+}
+
+.patient-summary-icon.summary-amber {
+  color: #a1834e;
+  background: #faf5e9;
+  font-size: 19px;
+}
+
+.patient-summary-card > span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.patient-summary-card strong {
+  color: #2f493c;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.patient-summary-card small {
+  color: #829188;
+  font-size: 11px;
+}
+
+.patients-list-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.patients-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.patients-list-heading h2 {
+  margin: 0;
+  color: #354d41;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.patients-list-heading p {
+  margin: 5px 0 0;
+  color: #89978f;
+  font-size: 11px;
+}
+
+.patient-add-button {
+  flex: 0 0 auto;
+}
+
+.patients-table-scroll {
+  overflow-x: auto;
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.patients-table th {
+  padding: 12px 14px;
+  color: #91a097;
+  background: #fbfcfb;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .45px;
+  white-space: nowrap;
+}
+
+.patients-table td {
+  padding: 11px 14px;
+  border-top: 1px solid #f0f3f1;
+  color: #687b71;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.patients-table tbody tr:hover {
+  background: #fcfdfc;
+}
+
+.patient-directory-person {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.patient-directory-person > span:last-child,
+.patient-contact {
+  display: grid;
+  gap: 3px;
+}
+
+.patient-directory-person strong,
+.patient-contact strong {
+  color: #465e51;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.patient-directory-person small,
+.patient-contact small {
+  color: #96a39b;
+  font-size: 10px;
+}
+
+.patient-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #568366;
+  background: #f0f7f1;
+  font-size: 10px;
+}
+
+.patient-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.patient-status-monitoring {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.patient-status-discharged {
+  color: #75867d;
+  background: #f1f4f2;
+}
+
+.patient-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.patient-row-actions button {
+  padding: 6px 8px;
+  border: 1px solid #e6ece8;
+  border-radius: 6px;
+  color: #527a61;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+
+.patient-row-actions button:hover {
+  background: #f5faf6;
+}
+
+.patient-row-actions .patient-delete-action {
+  color: #a6605e;
+}
+
+.patient-row-actions .patient-delete-action:hover {
+  border-color: #f0d9d7;
+  background: #fdf6f5;
+}
+
+.patients-demo-note {
+  padding: 0 20px 14px;
+  margin: 0;
+  color: #98a49d;
+  font-size: 10px;
+}
+
+.patient-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(26, 43, 35, .42);
+}
+
+.patient-modal {
+  width: min(100%, 500px);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid #e7eee9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(28, 52, 40, .18);
+}
+
+.patient-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.patient-modal-heading h2,
+.patient-delete-modal h2 {
+  margin: 0;
+  color: #314a3d;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.patient-modal-heading p,
+.patient-delete-modal p {
+  margin: 6px 0 0;
+  color: #84938a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.patient-modal-close {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: #718078;
+  background: #f2f6f3;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.patient-modal form {
+  display: grid;
+  gap: 13px;
+}
+
+.patient-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.patient-form-field {
+  display: grid;
+  gap: 6px;
+  color: #52675b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.patient-form-field input,
+.patient-form-field select {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #dfe8e2;
+  border-radius: 7px;
+  outline: 0;
+  color: #43594c;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.patient-form-field input:focus,
+.patient-form-field select:focus {
+  border-color: #80ae91;
+  box-shadow: 0 0 0 3px rgba(80, 142, 102, .1);
+}
+
+.patient-form-error {
+  margin: 0;
+  color: #a64e4a;
+  font-size: 11px;
+}
+
+.patient-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.patient-confirm-delete {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #a34f4d;
+  border-radius: 7px;
+  color: #fff;
+  background: #a34f4d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.patient-confirm-delete:hover {
+  background: #8e403e;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1587,6 +1929,48 @@
     align-items: flex-start;
     flex-direction: column;
     padding: 15px;
+  }
+
+  .patients-summary {
+    gap: 8px;
+  }
+
+  .patient-summary-card {
+    min-height: 72px;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .patient-summary-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .patient-summary-card strong {
+    font-size: 19px;
+  }
+
+  .patient-summary-card small {
+    font-size: 10px;
+  }
+
+  .patients-list-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .patients-table {
+    min-width: 760px;
+  }
+
+  .patients-demo-note {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .patient-modal {
+    padding: 18px;
   }
 
   .doctor-specialty-filter,

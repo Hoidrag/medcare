@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { AuthUser } from '../../services/auth'
 import DashboardSidebar from './DashboardSidebar'
 import DoctorsDirectory from './DoctorsDirectory'
+import PatientsDirectory from './PatientsDirectory'
 import AppointmentsTable from './widgets/AppointmentsTable'
 import OverviewStats from './widgets/OverviewStats'
 import PatientTrends from './widgets/PatientTrends'
@@ -24,23 +25,19 @@ type DashboardPageProps = {
 }
 
 export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
-  const [currentDate, setCurrentDate] = useState('')
+  const [currentDate] = useState(formatCurrentDate)
   const [activeItem, setActiveItem] = useState('Tablou de bord')
   const [notice, setNotice] = useState('')
   const [query, setQuery] = useState('')
   const [period, setPeriod] = useState('Săptămâna aceasta')
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  useEffect(() => {
-    setCurrentDate(formatCurrentDate())
-  }, [])
-
   const heading =
     activeItem === 'Tablou de bord' ? `Bun venit, ${user.name}!` : activeItem
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord' && item !== 'Medici') {
+    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -86,9 +83,13 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
             <input
               id="dashboard-search"
               type="search"
-              placeholder={activeItem === 'Medici'
-                ? 'Caută medic sau specialitate...'
-                : 'Caută pacienți sau programări...'}
+              placeholder={
+                activeItem === 'Medici'
+                  ? 'Caută medic sau specialitate...'
+                  : activeItem === 'Pacienți'
+                    ? 'Caută pacient după nume sau contact...'
+                    : 'Caută pacienți sau programări...'
+              }
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -132,7 +133,9 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
               <p>
                 {activeItem === 'Medici'
                   ? 'Explorează echipa medicală și disponibilitatea specialiștilor.'
-                  : 'O privire de ansamblu asupra activității clinicii tale.'}
+                  : activeItem === 'Pacienți'
+                    ? 'Gestionează registrul și datele de contact ale pacienților.'
+                    : 'O privire de ansamblu asupra activității clinicii tale.'}
               </p>
             </div>
             {activeItem === 'Tablou de bord' && <div className="dashboard-actions">
@@ -168,6 +171,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
           )}
           {activeItem === 'Medici' ? (
             <DoctorsDirectory query={query} />
+          ) : activeItem === 'Pacienți' ? (
+            <PatientsDirectory query={query} />
           ) : (
             <>
               <OverviewStats />
