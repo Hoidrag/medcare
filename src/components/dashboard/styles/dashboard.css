@@ -4327,3 +4327,45 @@
 .billing-page .billing-demo-note {
   font-size: 10px;
 }
+
+.dashboard-page .overview-stats .stat-card {
+  padding: 10px 12px 8px;
+}
+
+.dashboard-page .overview-stats .stat-value {
+  margin-top: 8px;
+}
+
+.dashboard-page .overview-stats .stat-change {
+  min-height: 13px;
+  margin-top: 2px;
+}
+
+.dashboard-page .overview-stats .stat-chart {
+  height: 25px;
+  margin-top: 3px;
+}
+
+.departments-directory .department-summary-card {
+  min-height: 66px;
+  gap: 9px;
+  padding: 9px 12px;
+}
+
+.departments-directory .department-summary-icon {
+  width: 34px;
+  height: 34px;
+}
+
+@media (max-width: 680px) {
+  .departments-directory .department-summary-card {
+    min-height: 60px;
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .departments-directory .department-summary-icon {
+    width: 30px;
+    height: 30px;
+  }
+}
