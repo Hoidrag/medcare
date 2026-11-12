@@ -1245,16 +1245,16 @@
 
 .doctor-summary-card {
   display: flex;
-  min-height: 82px;
+  min-height: 68px;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 10px 14px;
 }
 
 .doctor-summary-icon {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   flex: 0 0 auto;
   place-items: center;
   border-radius: 12px;
@@ -1282,14 +1282,14 @@
 
 .doctor-summary-card strong {
   color: #2f493c;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 600;
   line-height: 1;
 }
 
 .doctor-summary-card small {
   color: #829188;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .doctors-list-card {
@@ -1309,14 +1309,24 @@
 .doctors-list-heading h2 {
   margin: 0;
   color: #354d41;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .doctors-list-heading p {
   margin: 5px 0 0;
   color: #89978f;
-  font-size: 11px;
+  font-size: 12px;
+}
+
+.doctors-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.doctor-add-button {
+  flex: 0 0 auto;
 }
 
 .doctor-specialty-filter select {
@@ -1329,7 +1339,7 @@
   color: #64776c;
   background: #fff;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .doctor-specialty-filter select:focus {
@@ -1348,20 +1358,20 @@
 }
 
 .doctors-table th {
-  padding: 12px 14px;
+  padding: 13px 14px;
   color: #91a097;
   background: #fbfcfb;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: .45px;
   white-space: nowrap;
 }
 
 .doctors-table td {
-  padding: 12px 14px;
+  padding: 13px 14px;
   border-top: 1px solid #f0f3f1;
   color: #687b71;
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -1382,13 +1392,13 @@
 
 .doctor-directory-person strong {
   color: #465e51;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .doctor-directory-person small {
   color: #96a39b;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .doctor-status {
@@ -1399,7 +1409,7 @@
   border-radius: 999px;
   color: #568366;
   background: #f0f7f1;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .doctor-status i {
@@ -1432,7 +1442,7 @@
   border-radius: 8px;
   color: #4c795e;
   background: #eff6f0;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1440,7 +1450,37 @@
   padding: 0 20px 14px;
   margin: 0;
   color: #98a49d;
+  font-size: 11px;
+}
+
+.doctor-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.doctor-row-actions button {
+  padding: 6px 8px;
+  border: 1px solid #e6ece8;
+  border-radius: 6px;
+  color: #527a61;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
   font-size: 10px;
+}
+
+.doctor-row-actions button:hover {
+  background: #f5faf6;
+}
+
+.doctor-row-actions .doctor-delete-action {
+  color: #a6605e;
+}
+
+.doctor-row-actions .doctor-delete-action:hover {
+  border-color: #f0d9d7;
+  background: #fdf6f5;
 }
 
 .patients-directory {
@@ -3632,28 +3672,33 @@
   }
 
   .doctor-summary-card {
-    min-height: 72px;
-    gap: 8px;
-    padding: 11px;
+    min-height: 60px;
+    gap: 7px;
+    padding: 8px;
   }
 
   .doctor-summary-icon {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
   }
 
   .doctor-summary-card strong {
-    font-size: 19px;
+    font-size: 20px;
   }
 
   .doctor-summary-card small {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .doctors-list-heading {
     align-items: flex-start;
     flex-direction: column;
     padding: 15px;
+  }
+
+  .doctors-list-actions {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .patients-summary {
@@ -3795,8 +3840,17 @@
     max-width: none;
   }
 
+  .doctors-list-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .doctor-add-button {
+    width: 100%;
+  }
+
   .doctors-table {
-    min-width: 760px;
+    min-width: 860px;
   }
 
   .doctors-demo-note {
