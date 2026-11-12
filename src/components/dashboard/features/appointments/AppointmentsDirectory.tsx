@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import {
-  createDemoAppointments,
+  createDemoCalendarAppointments,
   demoDoctors,
   demoPatients,
   getLocalDateValue,
@@ -10,7 +10,23 @@ import {
 } from '../shared/demoData'
 
 type AppointmentForm = Omit<DemoAppointment, 'id' | 'age'>
-type DateFilter = 'today' | 'all'
+
+const calendarWeekdays = ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum']
+
+function getCalendarDays(month: Date) {
+  const firstDay = new Date(month.getFullYear(), month.getMonth(), 1)
+  const mondayOffset = (firstDay.getDay() + 6) % 7
+  const calendarStart = new Date(month.getFullYear(), month.getMonth(), 1 - mondayOffset)
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(calendarStart.getFullYear(), calendarStart.getMonth(), calendarStart.getDate() + index)
+    return {
+      date: getLocalDateValue(date),
+      day: date.getDate(),
+      isCurrentMonth: date.getMonth() === month.getMonth(),
+    }
+  })
+}
 
 function formatAppointmentDate(date: string) {
   return new Intl.DateTimeFormat('ro-RO', {
@@ -20,18 +36,26 @@ function formatAppointmentDate(date: string) {
   }).format(new Date(`${date}T12:00:00`))
 }
 
+function formatSelectedDate(date: string) {
+  return new Intl.DateTimeFormat('ro-RO', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date(`${date}T12:00:00`))
+}
+
+function getAppointmentStatusClass(status: DemoAppointmentStatus) {
+  if (status === 'Confirmată') return 'confirmed'
+  if (status === 'Anulată') return 'cancelled'
+  return 'pending'
+}
+
 function isAppointmentStatus(value: string): value is DemoAppointmentStatus {
   return value === 'Confirmată' || value === 'În așteptare' || value === 'Anulată'
 }
 
 function isAppointmentType(value: string): value is DemoAppointmentType {
   return value === 'Consultație' || value === 'Control' || value === 'Investigație'
-}
-
-function getStatusClass(status: DemoAppointmentStatus) {
-  if (status === 'Confirmată') return 'confirmed'
-  if (status === 'Anulată') return 'cancelled'
-  return 'pending'
 }
 
 const emptyForm = (): AppointmentForm => ({
@@ -50,19 +74,22 @@ type AppointmentsDirectoryProps = {
 
 export default function AppointmentsDirectory({ query }: AppointmentsDirectoryProps) {
   const [today] = useState(() => getLocalDateValue(new Date()))
-  const [appointments, setAppointments] = useState(createDemoAppointments)
+  const [appointments, setAppointments] = useState(createDemoCalendarAppointments)
+  const [selectedDate, setSelectedDate] = useState(today)
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const currentDate = new Date(`${today}T12:00:00`)
+    return new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+  })
   const [form, setForm] = useState<AppointmentForm>(emptyForm)
   const [editingAppointment, setEditingAppointment] = useState<DemoAppointment | null>(null)
   const [appointmentToDelete, setAppointmentToDelete] = useState<DemoAppointment | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formError, setFormError] = useState('')
-  const [dateFilter, setDateFilter] = useState<DateFilter>('today')
   const [statusFilter, setStatusFilter] = useState('Toate statusurile')
 
   const filteredAppointments = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ro')
     return appointments
-      .filter((appointment) => dateFilter === 'all' || appointment.date === today)
       .filter((appointment) => statusFilter === 'Toate statusurile' || appointment.status === statusFilter)
       .filter((appointment) =>
         !normalizedQuery
@@ -71,13 +98,35 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
           .includes(normalizedQuery),
       )
       .sort((first, second) => first.date.localeCompare(second.date) || first.time.localeCompare(second.time))
-  }, [appointments, dateFilter, query, statusFilter, today])
+  }, [appointments, query, statusFilter])
 
-  const todaysAppointments = appointments.filter((appointment) => appointment.date === today)
+  const calendarDays = useMemo(() => getCalendarDays(visibleMonth), [visibleMonth])
+  const appointmentsByDate = useMemo(() => filteredAppointments.reduce<Record<string, DemoAppointment[]>>(
+    (appointmentsByDate, appointment) => {
+      appointmentsByDate[appointment.date] ??= []
+      appointmentsByDate[appointment.date].push(appointment)
+      return appointmentsByDate
+    },
+    {},
+  ), [filteredAppointments])
+  const selectedDayAppointments = appointmentsByDate[selectedDate] ?? []
+  const monthLabel = new Intl.DateTimeFormat('ro-RO', { month: 'long', year: 'numeric' }).format(visibleMonth)
+
+  function navigateMonth(offset: number) {
+    const nextMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + offset, 1)
+    setVisibleMonth(nextMonth)
+    setSelectedDate(getLocalDateValue(nextMonth))
+  }
+
+  function showToday() {
+    const currentDate = new Date(`${today}T12:00:00`)
+    setVisibleMonth(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1))
+    setSelectedDate(today)
+  }
 
   function openCreateForm() {
     setEditingAppointment(null)
-    setForm(emptyForm())
+    setForm({ ...emptyForm(), date: selectedDate })
     setFormError('')
     setIsFormOpen(true)
   }
@@ -140,6 +189,9 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
         ...currentAppointments,
       ])
     }
+    const appointmentDate = new Date(`${form.date}T12:00:00`)
+    setVisibleMonth(new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), 1))
+    setSelectedDate(form.date)
     setIsFormOpen(false)
   }
 
@@ -160,21 +212,6 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
 
   return (
     <section className="appointments-directory" aria-label="Gestionarea programărilor">
-      <div className="appointments-summary">
-        <article className="dashboard-card appointment-summary-card">
-          <span className="appointment-summary-icon">▦</span>
-          <span><strong>{todaysAppointments.length}</strong><small>Programări astăzi</small></span>
-        </article>
-        <article className="dashboard-card appointment-summary-card">
-          <span className="appointment-summary-icon summary-green">✓</span>
-          <span><strong>{todaysAppointments.filter((appointment) => appointment.status === 'Confirmată').length}</strong><small>Confirmate</small></span>
-        </article>
-        <article className="dashboard-card appointment-summary-card">
-          <span className="appointment-summary-icon summary-amber">◷</span>
-          <span><strong>{todaysAppointments.filter((appointment) => appointment.status === 'În așteptare').length}</strong><small>În așteptare</small></span>
-        </article>
-      </div>
-
       <div className="dashboard-card appointments-directory-card">
         <div className="appointments-directory-heading">
           <div>
@@ -187,9 +224,11 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
         </div>
 
         <div className="appointments-toolbar">
-          <div className="appointment-date-filter" role="group" aria-label="Filtrează programările după dată">
-            <button type="button" className={dateFilter === 'today' ? 'active' : ''} onClick={() => setDateFilter('today')}>Astăzi</button>
-            <button type="button" className={dateFilter === 'all' ? 'active' : ''} onClick={() => setDateFilter('all')}>Toate datele</button>
+          <div className="appointment-calendar-controls" role="group" aria-label="Navighează calendarul">
+            <button type="button" className="appointment-calendar-today" onClick={showToday}>Astăzi</button>
+            <button type="button" className="appointment-calendar-arrow" aria-label="Luna anterioară" onClick={() => navigateMonth(-1)}>‹</button>
+            <button type="button" className="appointment-calendar-arrow" aria-label="Luna următoare" onClick={() => navigateMonth(1)}>›</button>
+            <h3>{monthLabel}</h3>
           </div>
           <label className="appointment-status-filter">
             <span className="visually-hidden">Filtrează după status</span>
@@ -202,41 +241,93 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
           </label>
         </div>
 
-        <div className="appointments-directory-table-scroll">
-          <table className="appointments-directory-table">
-            <thead>
-              <tr><th>DATA ȘI ORA</th><th>PACIENT</th><th>MEDIC</th><th>TIPUL VIZITEI</th><th>STATUS</th><th><span className="visually-hidden">Acțiuni</span></th></tr>
-            </thead>
-            <tbody>
-              {filteredAppointments.map((appointment) => (
-                <tr key={appointment.id}>
-                  <td><span className="appointment-date-cell"><strong>{formatAppointmentDate(appointment.date)}</strong><small>{appointment.time}</small></span></td>
-                  <td><strong className="appointment-person-name">{appointment.patient}</strong></td>
-                  <td><span className="appointment-doctor-cell"><strong>{appointment.doctor}</strong><small>{appointment.specialty}</small></span></td>
-                  <td>{appointment.type}</td>
-                  <td>
-                    <label className={`appointment-directory-status status-${getStatusClass(appointment.status)}`}>
-                      <span className="visually-hidden">Status pentru {appointment.patient}</span>
-                      <select value={appointment.status} onChange={(event) => updateStatus(appointment, event.target.value)}>
-                        <option>Confirmată</option>
-                        <option>În așteptare</option>
-                        <option>Anulată</option>
-                      </select>
-                    </label>
-                  </td>
-                  <td>
-                    <span className="appointment-row-actions">
-                      <button type="button" onClick={() => openEditForm(appointment)} aria-label={`Editează programarea pentru ${appointment.patient}`}>Editează</button>
-                      <button type="button" className="appointment-delete-action" onClick={() => setAppointmentToDelete(appointment)} aria-label={`Șterge programarea pentru ${appointment.patient}`}>Șterge</button>
+        <div className="appointments-calendar-layout">
+          <div className="appointment-calendar" role="group" aria-label={`Calendarul programărilor pentru ${monthLabel}`}>
+            <div className="appointment-calendar-weekdays" aria-hidden="true">
+              {calendarWeekdays.map((weekday) => <span key={weekday}>{weekday}</span>)}
+            </div>
+            <div className="appointment-calendar-grid">
+              {calendarDays.map((day) => {
+                const dayAppointments = appointmentsByDate[day.date] ?? []
+                const isSelected = selectedDate === day.date
+                const isToday = today === day.date
+
+                return (
+                  <button
+                    className={`appointment-calendar-day${day.isCurrentMonth ? '' : ' outside-month'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}`}
+                    type="button"
+                    key={day.date}
+                    aria-pressed={isSelected}
+                    aria-label={`${formatAppointmentDate(day.date)}${dayAppointments.length ? `, ${dayAppointments.length} programări` : ', fără programări'}`}
+                    onClick={() => setSelectedDate(day.date)}
+                  >
+                    <span className="appointment-calendar-day-number">{day.day}</span>
+                    <span className="appointment-calendar-events">
+                      {dayAppointments.slice(0, 2).map((appointment) => (
+                        <span
+                          className={`appointment-calendar-event status-${getAppointmentStatusClass(appointment.status)}`}
+                          key={appointment.id}
+                          title={`${appointment.time} · ${appointment.patient}`}
+                        >
+                          <strong>{appointment.time}</strong> {appointment.patient}
+                        </span>
+                      ))}
+                      {dayAppointments.length > 2 && (
+                        <span className="appointment-calendar-more">+{dayAppointments.length - 2} altele</span>
+                      )}
                     </span>
-                  </td>
-                </tr>
+                  </button>
+                )
+              })}
+            </div>
+            <div className="appointment-calendar-legend" aria-label="Legendă statusuri">
+              <span><i className="legend-confirmed" />Confirmată</span>
+              <span><i className="legend-pending" />În așteptare</span>
+              <span><i className="legend-cancelled" />Anulată</span>
+            </div>
+          </div>
+
+          <aside className="appointment-day-agenda" aria-label={`Programările din ${formatSelectedDate(selectedDate)}`}>
+            <div className="appointment-day-agenda-heading">
+              <div>
+                <span>AGENDA ZILEI</span>
+                <h3>{formatSelectedDate(selectedDate)}</h3>
+              </div>
+              <strong>{selectedDayAppointments.length}</strong>
+            </div>
+            <div className="appointment-day-agenda-list">
+              {selectedDayAppointments.map((appointment) => (
+                <article className={`appointment-agenda-card status-${getAppointmentStatusClass(appointment.status)}`} key={appointment.id}>
+                  <div className="appointment-agenda-time">{appointment.time}</div>
+                  <div className="appointment-agenda-details">
+                    <strong>{appointment.patient}</strong>
+                    <span>{appointment.doctor}</span>
+                    <small>{appointment.specialty} · {appointment.type}</small>
+                  </div>
+                  <label className={`appointment-directory-status status-${getAppointmentStatusClass(appointment.status)}`}>
+                    <span className="visually-hidden">Status pentru {appointment.patient}</span>
+                    <select value={appointment.status} onChange={(event) => updateStatus(appointment, event.target.value)}>
+                      <option>Confirmată</option>
+                      <option>În așteptare</option>
+                      <option>Anulată</option>
+                    </select>
+                  </label>
+                  <span className="appointment-row-actions">
+                    <button type="button" onClick={() => openEditForm(appointment)} aria-label={`Editează programarea pentru ${appointment.patient}`}>Editează</button>
+                    <button type="button" className="appointment-delete-action" onClick={() => setAppointmentToDelete(appointment)} aria-label={`Șterge programarea pentru ${appointment.patient}`}>Șterge</button>
+                  </span>
+                </article>
               ))}
-              {filteredAppointments.length === 0 && (
-                <tr><td className="empty-results" colSpan={6}>Nu există programări pentru filtrele selectate.</td></tr>
+              {selectedDayAppointments.length === 0 && (
+                <div className="appointment-agenda-empty">
+                  <span aria-hidden="true">▦</span>
+                  <strong>Zi fără programări</strong>
+                  <p>{filteredAppointments.length === 0 ? 'Nu există programări pentru filtrele selectate.' : 'Selectează o altă zi sau adaugă o programare nouă.'}</p>
+                  <button type="button" onClick={openCreateForm}>＋ Adaugă programare</button>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          </aside>
         </div>
         <p className="appointments-demo-note">Date demonstrative — programările și modificările sunt temporare și nu se salvează în baza de date.</p>
       </div>

@@ -71,6 +71,50 @@ export function createDemoAppointments(date = getLocalDateValue(new Date())): De
   ]
 }
 
+export function createDemoCalendarAppointments(date = getLocalDateValue(new Date())): DemoAppointment[] {
+  const firstDay = new Date(`${date}T12:00:00`)
+  const firstMonth = new Date(firstDay.getFullYear(), firstDay.getMonth(), 1)
+  const appointments = createDemoAppointments(date)
+  const appointmentDays = [
+    { monthOffset: 0, days: [6, 21] },
+    ...Array.from({ length: 5 }, (_, index) => ({
+      monthOffset: index + 1,
+      days: [4, 11, 18, 25],
+    })),
+  ]
+  const visitTypes: DemoAppointmentType[] = ['Consultație', 'Control', 'Investigație']
+  const statuses: DemoAppointmentStatus[] = ['Confirmată', 'În așteptare', 'Confirmată', 'Confirmată']
+  const times = ['09:00', '10:30', '13:30', '15:00']
+  let appointmentIndex = 0
+
+  for (const month of appointmentDays) {
+    for (const day of month.days) {
+      const patient = demoPatients[(appointmentIndex + 1) % demoPatients.length]
+      const doctor = demoDoctors[(appointmentIndex + 1) % demoDoctors.length]
+      const appointmentDate = new Date(
+        firstMonth.getFullYear(),
+        firstMonth.getMonth() + month.monthOffset,
+        day,
+      )
+
+      appointments.push({
+        id: `PROG-CAL-${String(appointmentIndex + 1).padStart(3, '0')}`,
+        date: getLocalDateValue(appointmentDate),
+        time: times[appointmentIndex % times.length],
+        patient: patient.name,
+        age: patient.age,
+        doctor: doctor.name,
+        specialty: doctor.specialty,
+        type: visitTypes[appointmentIndex % visitTypes.length],
+        status: statuses[appointmentIndex % statuses.length],
+      })
+      appointmentIndex += 1
+    }
+  }
+
+  return appointments
+}
+
 export const demoAppointments = createDemoAppointments()
 
 export type DemoDepartmentStatus = 'Activ' | 'Program limitat' | 'În amenajare'
