@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit'
 import session from 'express-session'
 import helmet from 'helmet'
 import mongoose from 'mongoose'
+import { Doctor, type DoctorAccount, type DoctorStatus } from './models/Doctor.js'
 import { User } from './models/User.js'
 
 const sessionSecret = process.env.SESSION_SECRET
@@ -129,6 +130,179 @@ function regenerateSession(request: express.Request) {
 }
 
 const authRouter = express.Router()
+const doctorsRouter = express.Router()
+
+type DoctorInput = Pick<DoctorAccount, 'name' | 'specialty' | 'department' | 'experience' | 'schedule' | 'status'>
+
+function isDoctorStatus(value: unknown): value is DoctorStatus {
+  return value === 'Disponibil' || value === 'În consultație' || value === 'Indisponibil'
+}
+
+function parseDoctorInput(value: unknown): DoctorInput | null {
+  if (!isRecord(value)) return null
+
+  const { name, specialty, department, experience, schedule, status } = value
+  if (
+    typeof name !== 'string'
+    || typeof specialty !== 'string'
+    || typeof department !== 'string'
+    || typeof experience !== 'number'
+    || !Number.isInteger(experience)
+    || typeof schedule !== 'string'
+    || !isDoctorStatus(status)
+  ) {
+    return null
+  }
+
+  const normalizedName = name.trim()
+  const normalizedSpecialty = specialty.trim()
+  const normalizedDepartment = department.trim()
+  const normalizedSchedule = schedule.trim()
+
+  if (
+    normalizedName.length < 2 || normalizedName.length > 100
+    || normalizedSpecialty.length < 2 || normalizedSpecialty.length > 80
+    || normalizedDepartment.length < 2 || normalizedDepartment.length > 80
+    || experience < 0 || experience > 60
+    || normalizedSchedule.length < 2 || normalizedSchedule.length > 40
+  ) {
+    return null
+  }
+
+  return {
+    name: normalizedName,
+    specialty: normalizedSpecialty,
+    department: normalizedDepartment,
+    experience,
+    schedule: normalizedSchedule,
+    status,
+  }
+}
+
+function publicDoctor(doctor: {
+  _id: { toString: () => string }
+  name: string
+  specialty: string
+  department: string
+  experience: number
+  schedule: string
+  status: DoctorStatus
+  appointments: number
+}) {
+  return {
+    id: doctor._id.toString(),
+    name: doctor.name,
+    specialty: doctor.specialty,
+    department: doctor.department,
+    experience: doctor.experience,
+    schedule: doctor.schedule,
+    status: doctor.status,
+    appointments: doctor.appointments,
+  }
+}
+
+function getRequestUserId(request: express.Request, response: express.Response): string | null {
+  const userId = request.session.userId
+  if (userId) return userId
+
+  response.status(401).json({ message: 'Autentifică-te pentru a gestiona medicii.' })
+  return null
+}
+
+doctorsRouter.get('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const doctors = await Doctor.find({ owner: ownerId }).sort({ name: 1 })
+  response.json({ doctors: doctors.map(publicDoctor) })
+})
+
+doctorsRouter.post('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const doctorInput = parseDoctorInput(request.body)
+  if (!doctorInput) {
+    response.status(400).json({ message: 'Verifică numele, specialitatea, departamentul, experiența, programul și disponibilitatea medicului.' })
+    return
+  }
+
+  try {
+    const doctor = await Doctor.create({
+      ...doctorInput,
+      owner: ownerId,
+      normalizedName: doctorInput.name.normalize('NFKC').toLocaleLowerCase('ro'),
+    })
+    response.status(201).json({ doctor: publicDoctor(doctor) })
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      response.status(409).json({ message: 'Există deja un medic cu acest nume în lista ta.' })
+      return
+    }
+
+    throw error
+  }
+})
+
+doctorsRouter.put('/:doctorId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const doctorId = request.params.doctorId
+  if (!mongoose.isValidObjectId(doctorId)) {
+    response.status(400).json({ message: 'Identificatorul medicului nu este valid.' })
+    return
+  }
+
+  const doctorInput = parseDoctorInput(request.body)
+  if (!doctorInput) {
+    response.status(400).json({ message: 'Verifică numele, specialitatea, departamentul, experiența, programul și disponibilitatea medicului.' })
+    return
+  }
+
+  try {
+    const doctor = await Doctor.findOneAndUpdate(
+      { _id: doctorId, owner: ownerId },
+      {
+        ...doctorInput,
+        normalizedName: doctorInput.name.normalize('NFKC').toLocaleLowerCase('ro'),
+      },
+      { new: true, runValidators: true },
+    )
+    if (!doctor) {
+      response.status(404).json({ message: 'Medicul nu a fost găsit în lista ta.' })
+      return
+    }
+
+    response.json({ doctor: publicDoctor(doctor) })
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      response.status(409).json({ message: 'Există deja un medic cu acest nume în lista ta.' })
+      return
+    }
+
+    throw error
+  }
+})
+
+doctorsRouter.delete('/:doctorId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const doctorId = request.params.doctorId
+  if (!mongoose.isValidObjectId(doctorId)) {
+    response.status(400).json({ message: 'Identificatorul medicului nu este valid.' })
+    return
+  }
+
+  const doctor = await Doctor.findOneAndDelete({ _id: doctorId, owner: ownerId })
+  if (!doctor) {
+    response.status(404).json({ message: 'Medicul nu a fost găsit în lista ta.' })
+    return
+  }
+
+  response.status(204).end()
+})
 
 authRouter.post('/register', authRateLimit, async (request, response) => {
   if (!isRecord(request.body)) {
@@ -262,6 +436,16 @@ authRouter.post('/logout', (request, response, next) => {
 })
 
 app.use('/api/auth', authRouter)
+
+app.use('/api/doctors', (_request, response, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    response.status(503).json({ message: 'Baza de date nu este conectată. Verifică MongoDB Atlas și încearcă din nou.' })
+    return
+  }
+
+  next()
+})
+app.use('/api/doctors', doctorsRouter)
 
 const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
   console.error('Eroare neașteptată în API.', error)

@@ -1446,11 +1446,37 @@
   font-weight: 600;
 }
 
-.doctors-demo-note {
+.doctors-info-note {
   padding: 0 20px 14px;
   margin: 0;
   color: #98a49d;
   font-size: 11px;
+}
+
+.doctors-load-state {
+  padding: 24px 16px;
+  margin: 0;
+  color: #718179;
+  font-size: 12px;
+  text-align: center;
+}
+
+.doctors-load-error {
+  color: #a6605e;
+}
+
+.doctors-load-error p {
+  margin: 0 0 10px;
+}
+
+.doctors-load-error button {
+  padding: 7px 10px;
+  border: 1px solid #e6ece8;
+  border-radius: 6px;
+  color: #527a61;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
 }
 
 .doctor-row-actions {
@@ -3870,7 +3896,7 @@
     min-width: 860px;
   }
 
-  .doctors-demo-note {
+  .doctors-info-note {
     padding-right: 15px;
     padding-left: 15px;
   }
