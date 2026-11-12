@@ -1497,16 +1497,16 @@
 
 .patient-summary-card {
   display: flex;
-  min-height: 82px;
+  min-height: 68px;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 10px 14px;
 }
 
 .patient-summary-icon {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   flex: 0 0 auto;
   place-items: center;
   border-radius: 12px;
@@ -1534,14 +1534,14 @@
 
 .patient-summary-card strong {
   color: #2f493c;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 600;
   line-height: 1;
 }
 
 .patient-summary-card small {
   color: #829188;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .patients-list-card {
@@ -1561,18 +1561,22 @@
 .patients-list-heading h2 {
   margin: 0;
   color: #354d41;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .patients-list-heading p {
   margin: 5px 0 0;
   color: #89978f;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .patient-add-button {
   flex: 0 0 auto;
+}
+
+.patients-directory .patient-add-button {
+  font-size: 12px;
 }
 
 .patients-table-scroll {
@@ -1586,20 +1590,20 @@
 }
 
 .patients-table th {
-  padding: 12px 14px;
+  padding: 13px 14px;
   color: #91a097;
   background: #fbfcfb;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: .45px;
   white-space: nowrap;
 }
 
 .patients-table td {
-  padding: 11px 14px;
+  padding: 13px 14px;
   border-top: 1px solid #f0f3f1;
   color: #687b71;
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -1622,14 +1626,14 @@
 .patient-directory-person strong,
 .patient-contact strong {
   color: #465e51;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .patient-directory-person small,
 .patient-contact small {
   color: #96a39b;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .patient-status {
@@ -1640,7 +1644,7 @@
   border-radius: 999px;
   color: #568366;
   background: #f0f7f1;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .patient-status i {
@@ -1674,7 +1678,7 @@
   background: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .patient-row-actions button:hover {
@@ -1694,7 +1698,20 @@
   padding: 0 20px 14px;
   margin: 0;
   color: #98a49d;
-  font-size: 10px;
+  font-size: 11px;
+}
+
+.patients-directory .patient-form-field {
+  font-size: 12px;
+}
+
+.patients-directory .patient-form-field input,
+.patients-directory .patient-form-field select {
+  font-size: 13px;
+}
+
+.patients-directory .patient-modal-actions button {
+  font-size: 12px;
 }
 
 .patient-modal-backdrop {
@@ -3797,22 +3814,22 @@
   }
 
   .patient-summary-card {
-    min-height: 72px;
-    gap: 8px;
-    padding: 11px;
+    min-height: 60px;
+    gap: 7px;
+    padding: 8px;
   }
 
   .patient-summary-icon {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
   }
 
   .patient-summary-card strong {
-    font-size: 19px;
+    font-size: 20px;
   }
 
   .patient-summary-card small {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .patients-list-heading {
