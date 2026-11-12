@@ -7,6 +7,7 @@ import session from 'express-session'
 import helmet from 'helmet'
 import mongoose from 'mongoose'
 import { Doctor, type DoctorAccount, type DoctorStatus } from './models/Doctor.js'
+import { Patient, type PatientAccount, type PatientStatus } from './models/Patient.js'
 import { User } from './models/User.js'
 
 const sessionSecret = process.env.SESSION_SECRET
@@ -131,8 +132,56 @@ function regenerateSession(request: express.Request) {
 
 const authRouter = express.Router()
 const doctorsRouter = express.Router()
+const patientsRouter = express.Router()
 
 type DoctorInput = Pick<DoctorAccount, 'name' | 'specialty' | 'department' | 'experience' | 'schedule' | 'status'>
+type PatientInput = Pick<PatientAccount, 'name' | 'age' | 'phone' | 'email' | 'lastVisit' | 'status'>
+
+function isPatientStatus(value: unknown): value is PatientStatus {
+  return value === 'Activ' || value === 'Monitorizare' || value === 'Externat'
+}
+
+function parsePatientInput(value: unknown): PatientInput | null {
+  if (!isRecord(value)) return null
+
+  const { name, age, phone, email, lastVisit, status } = value
+  if (
+    typeof name !== 'string'
+    || typeof age !== 'number'
+    || !Number.isInteger(age)
+    || typeof phone !== 'string'
+    || typeof email !== 'string'
+    || typeof lastVisit !== 'string'
+    || !isPatientStatus(status)
+  ) {
+    return null
+  }
+
+  const normalizedName = name.trim()
+  const normalizedPhone = phone.trim()
+  const normalizedEmail = email.trim().toLowerCase()
+  const normalizedLastVisit = lastVisit.trim()
+
+  if (
+    normalizedName.length < 2 || normalizedName.length > 100
+    || age < 0 || age > 125
+    || normalizedPhone.length > 30
+    || normalizedEmail.length > 150
+    || (normalizedEmail.length > 0 && !isValidEmail(normalizedEmail))
+    || normalizedLastVisit.length > 30
+  ) {
+    return null
+  }
+
+  return {
+    name: normalizedName,
+    age,
+    phone: normalizedPhone,
+    email: normalizedEmail,
+    lastVisit: normalizedLastVisit,
+    status,
+  }
+}
 
 function isDoctorStatus(value: unknown): value is DoctorStatus {
   return value === 'Disponibil' || value === 'În consultație' || value === 'Indisponibil'
@@ -201,6 +250,26 @@ function publicDoctor(doctor: {
   }
 }
 
+function publicPatient(patient: {
+  _id: { toString: () => string }
+  name: string
+  age: number
+  phone: string
+  email: string
+  lastVisit: string
+  status: PatientStatus
+}) {
+  return {
+    id: patient._id.toString(),
+    name: patient.name,
+    age: patient.age,
+    phone: patient.phone,
+    email: patient.email,
+    lastVisit: patient.lastVisit,
+    status: patient.status,
+  }
+}
+
 function getRequestUserId(request: express.Request, response: express.Response): string | null {
   const userId = request.session.userId
   if (userId) return userId
@@ -208,6 +277,76 @@ function getRequestUserId(request: express.Request, response: express.Response):
   response.status(401).json({ message: 'Autentifică-te pentru a gestiona medicii.' })
   return null
 }
+
+patientsRouter.get('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const patients = await Patient.find({ owner: ownerId }).sort({ name: 1 })
+  response.json({ patients: patients.map(publicPatient) })
+})
+
+patientsRouter.post('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const patientInput = parsePatientInput(request.body)
+  if (!patientInput) {
+    response.status(400).json({ message: 'Verifică numele, vârsta, datele de contact, ultima vizită și statusul pacientului.' })
+    return
+  }
+
+  const patient = await Patient.create({ ...patientInput, owner: ownerId })
+  response.status(201).json({ patient: publicPatient(patient) })
+})
+
+patientsRouter.put('/:patientId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const patientId = request.params.patientId
+  if (!mongoose.isValidObjectId(patientId)) {
+    response.status(400).json({ message: 'Identificatorul pacientului nu este valid.' })
+    return
+  }
+
+  const patientInput = parsePatientInput(request.body)
+  if (!patientInput) {
+    response.status(400).json({ message: 'Verifică numele, vârsta, datele de contact, ultima vizită și statusul pacientului.' })
+    return
+  }
+
+  const patient = await Patient.findOneAndUpdate(
+    { _id: patientId, owner: ownerId },
+    patientInput,
+    { new: true, runValidators: true },
+  )
+  if (!patient) {
+    response.status(404).json({ message: 'Pacientul nu a fost găsit în lista ta.' })
+    return
+  }
+
+  response.json({ patient: publicPatient(patient) })
+})
+
+patientsRouter.delete('/:patientId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const patientId = request.params.patientId
+  if (!mongoose.isValidObjectId(patientId)) {
+    response.status(400).json({ message: 'Identificatorul pacientului nu este valid.' })
+    return
+  }
+
+  const patient = await Patient.findOneAndDelete({ _id: patientId, owner: ownerId })
+  if (!patient) {
+    response.status(404).json({ message: 'Pacientul nu a fost găsit în lista ta.' })
+    return
+  }
+
+  response.status(204).end()
+})
 
 doctorsRouter.get('/', async (request, response) => {
   const ownerId = getRequestUserId(request, response)
@@ -446,6 +585,16 @@ app.use('/api/doctors', (_request, response, next) => {
   next()
 })
 app.use('/api/doctors', doctorsRouter)
+
+app.use('/api/patients', (_request, response, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    response.status(503).json({ message: 'Baza de date nu este conectată. Verifică MongoDB Atlas și încearcă din nou.' })
+    return
+  }
+
+  next()
+})
+app.use('/api/patients', patientsRouter)
 
 const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
   console.error('Eroare neașteptată în API.', error)

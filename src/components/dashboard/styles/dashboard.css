@@ -1453,7 +1453,8 @@
   font-size: 11px;
 }
 
-.doctors-load-state {
+.doctors-load-state,
+.patients-load-state {
   padding: 24px 16px;
   margin: 0;
   color: #718179;
@@ -1461,15 +1462,18 @@
   text-align: center;
 }
 
-.doctors-load-error {
+.doctors-load-error,
+.patients-load-error {
   color: #a6605e;
 }
 
-.doctors-load-error p {
+.doctors-load-error p,
+.patients-load-error p {
   margin: 0 0 10px;
 }
 
-.doctors-load-error button {
+.doctors-load-error button,
+.patients-load-error button {
   padding: 7px 10px;
   border: 1px solid #e6ece8;
   border-radius: 6px;
