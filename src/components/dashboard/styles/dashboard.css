@@ -4146,3 +4146,184 @@
     font-size: 10px;
   }
 }
+
+.dashboard-page .stat-card-heading h2 {
+  font-size: 12px;
+}
+
+.dashboard-page .stat-change {
+  font-size: 10px;
+}
+
+.dashboard-page .stat-chart-labels,
+.dashboard-page .chart-y-labels,
+.dashboard-page .chart-x-labels {
+  font-size: 9px;
+}
+
+.dashboard-page .dashboard-demo-note,
+.dashboard-page .widget-title p,
+.dashboard-page .trend-positive,
+.dashboard-page .trend-summary small {
+  font-size: 11px;
+}
+
+.dashboard-page .widget-title h2 {
+  font-size: 14px;
+}
+
+.dashboard-page .chart-legend {
+  font-size: 11px;
+}
+
+.dashboard-page .specialty-tag,
+.dashboard-page .featured-caption span,
+.dashboard-page .featured-caption small {
+  font-size: 10px;
+}
+
+.dashboard-page .specialist-info strong,
+.dashboard-page .all-specialists,
+.dashboard-page .appointments-card td {
+  font-size: 11px;
+}
+
+.dashboard-page .specialist-info small,
+.dashboard-page .date-chip,
+.dashboard-page .appointments-card th,
+.dashboard-page .patient-cell small,
+.dashboard-page .table-subtext,
+.dashboard-page .appointment-status {
+  font-size: 9px;
+}
+
+.dashboard-page .availability {
+  font-size: 8px;
+}
+
+.departments-directory .department-summary-card strong {
+  font-size: 21px;
+}
+
+.departments-directory .department-summary-card small,
+.departments-directory .departments-list-heading p {
+  font-size: 12px;
+}
+
+.departments-directory .departments-list-heading h2,
+.departments-directory .department-card h3 {
+  font-size: 16px;
+}
+
+.departments-directory .department-status,
+.departments-directory .department-metrics small,
+.departments-directory .department-doctors strong,
+.departments-directory .department-doctors p,
+.departments-directory .department-card-actions > button,
+.departments-directory .department-card-actions > span > button {
+  font-size: 11px;
+}
+
+.departments-directory .department-description,
+.departments-directory .department-meta span {
+  font-size: 12px;
+}
+
+.departments-directory .department-metrics strong {
+  font-size: 18px;
+}
+
+.departments-directory .departments-demo-note,
+.departments-directory .primary-action {
+  font-size: 11px;
+}
+
+.analytics-reports .analytics-demo-banner p,
+.analytics-reports .analytics-section-heading p,
+.analytics-reports .analytics-privacy-note {
+  font-size: 11px;
+}
+
+.analytics-reports .analytics-export-button,
+.analytics-reports .analytics-filters label > span,
+.analytics-reports .analytics-kpi-label,
+.analytics-reports .analytics-chart-legend,
+.analytics-reports .analytics-department-row > div:first-child,
+.analytics-reports .analytics-department-row strong,
+.analytics-reports .analytics-doctor-name strong,
+.analytics-reports .analytics-doctor-percent {
+  font-size: 11px;
+}
+
+.analytics-reports .analytics-filters select {
+  font-size: 12px;
+}
+
+.analytics-reports .analytics-kpi > strong {
+  font-size: 23px;
+}
+
+.analytics-reports .analytics-kpi > small,
+.analytics-reports .analytics-chart-y,
+.analytics-reports .analytics-chart-x,
+.analytics-reports .analytics-doctor-name small,
+.analytics-reports .analytics-doctor-count {
+  font-size: 10px;
+}
+
+.analytics-reports .analytics-section-heading h2 {
+  font-size: 15px;
+}
+
+.analytics-reports .analytics-period-badge {
+  font-size: 10px;
+}
+
+.analytics-reports .analytics-empty {
+  font-size: 12px;
+}
+
+.billing-page .billing-demo-banner p,
+.billing-page .billing-workspace-heading p {
+  font-size: 12px;
+}
+
+.billing-page .billing-summary-card strong {
+  font-size: 18px;
+}
+
+.billing-page .billing-summary-card small,
+.billing-page .billing-table-toolbar p,
+.billing-page .billing-date-cell small,
+.billing-page .billing-status select {
+  font-size: 11px;
+}
+
+.billing-page .billing-workspace-heading h2 {
+  font-size: 16px;
+}
+
+.billing-page .billing-tabs button,
+.billing-page .billing-table-toolbar select,
+.billing-page .billing-primary-cell,
+.billing-page .billing-amount,
+.billing-page .billing-date-cell strong {
+  font-size: 12px;
+}
+
+.billing-page .billing-tabs button span {
+  font-size: 10px;
+}
+
+.billing-page .billing-table th {
+  font-size: 10px;
+}
+
+.billing-page .billing-table td {
+  font-size: 11px;
+}
+
+.billing-page .billing-row-actions button,
+.billing-page .billing-demo-note {
+  font-size: 10px;
+}
