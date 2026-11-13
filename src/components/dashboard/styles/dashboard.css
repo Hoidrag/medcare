@@ -509,10 +509,40 @@
   cursor: pointer;
 }
 
-.dashboard-demo-note {
-  margin: 12px 0 13px;
-  color: #91a098;
-  font-size: 10px;
+.dashboard-overview-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-top: 16px;
+  border: 1px solid #f0d9d7;
+  border-radius: 9px;
+  color: #a6605e;
+  background: #fdf6f5;
+  font-size: 12px;
+}
+
+.dashboard-overview-error p {
+  margin: 0;
+}
+
+.dashboard-overview-error button {
+  padding: 7px 10px;
+  border: 1px solid #e6ece8;
+  border-radius: 6px;
+  color: #527a61;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.overview-widget-empty {
+  padding: 18px 10px;
+  margin: 0;
+  color: #87958e;
+  font-size: 11px;
+  text-align: center;
 }
 
 .dashboard-notice {
@@ -1223,6 +1253,11 @@
 .appointment-status.status-confirmed {
   color: #508364;
   background: #eff7f0;
+}
+
+.appointment-status.status-cancelled {
+  color: #a46f6c;
+  background: #fbf0ef;
 }
 
 .empty-results {
@@ -4145,7 +4180,6 @@
   .sidebar-user-copy span,
   .topbar-profile small,
   .dashboard-eyebrow,
-  .dashboard-demo-note,
   .widget-title p,
   .trend-positive,
   .trend-summary small,
@@ -4232,7 +4266,6 @@
   font-size: 9px;
 }
 
-.dashboard-page .dashboard-demo-note,
 .dashboard-page .widget-title p,
 .dashboard-page .trend-positive,
 .dashboard-page .trend-summary small {

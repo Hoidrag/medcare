@@ -3,10 +3,7 @@ import AppointmentsDirectory from './features/appointments/AppointmentsDirectory
 import BillingInsurance from './features/billing/BillingInsurance'
 import DepartmentsDirectory from './features/departments/DepartmentsDirectory'
 import DoctorsDirectory from './features/doctors/DoctorsDirectory'
-import OverviewStats from './features/overview/widgets/OverviewStats'
-import AppointmentsTable from './features/overview/widgets/AppointmentsTable'
-import AppointmentsBySpecialty from './features/overview/widgets/AppointmentsBySpecialty'
-import SpecialistsPanel from './features/overview/widgets/SpecialistsPanel'
+import DashboardOverview from './features/overview/DashboardOverview'
 import PatientsDirectory from './features/patients/PatientsDirectory'
 
 type DashboardContentProps = {
@@ -27,14 +24,5 @@ export default function DashboardContent({
   if (activeItem === 'Analize și rapoarte') return <AnalyticsReports query={query} />
   if (activeItem === 'Facturare și asigurări') return <BillingInsurance query={query} />
 
-  return (
-    <>
-      <OverviewStats />
-      <div className="dashboard-overview-grid">
-        <AppointmentsBySpecialty />
-        <SpecialistsPanel onViewAll={() => onNavigate('Medici')} />
-      </div>
-      <AppointmentsTable query={query} onViewAll={() => onNavigate('Programări')} />
-    </>
-  )
+  return <DashboardOverview query={query} onNavigate={onNavigate} />
 }
