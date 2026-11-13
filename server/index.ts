@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit'
 import session from 'express-session'
 import helmet from 'helmet'
 import mongoose from 'mongoose'
+import { Appointment, type AppointmentStatus, type AppointmentType } from './models/Appointment.js'
 import { Doctor, type DoctorAccount, type DoctorStatus } from './models/Doctor.js'
 import { Patient, type PatientAccount, type PatientStatus } from './models/Patient.js'
 import { User } from './models/User.js'
@@ -131,11 +132,107 @@ function regenerateSession(request: express.Request) {
 }
 
 const authRouter = express.Router()
+const appointmentsRouter = express.Router()
 const doctorsRouter = express.Router()
 const patientsRouter = express.Router()
 
+type AppointmentInput = {
+  patientId: string
+  doctorId: string
+  date: string
+  time: string
+  type: AppointmentType
+  status: AppointmentStatus
+}
 type DoctorInput = Pick<DoctorAccount, 'name' | 'specialty' | 'department' | 'experience' | 'schedule' | 'status'>
 type PatientInput = Pick<PatientAccount, 'name' | 'age' | 'phone' | 'email' | 'lastVisit' | 'status'>
+
+function isAppointmentStatus(value: unknown): value is AppointmentStatus {
+  return value === 'Confirmată' || value === 'În așteptare' || value === 'Anulată'
+}
+
+function isAppointmentType(value: unknown): value is AppointmentType {
+  return value === 'Consultație' || value === 'Control' || value === 'Investigație'
+}
+
+function parseAppointmentInput(value: unknown): AppointmentInput | null {
+  if (!isRecord(value)) return null
+
+  const { patientId, doctorId, date, time, type, status } = value
+  if (
+    typeof patientId !== 'string'
+    || !mongoose.isValidObjectId(patientId)
+    || typeof doctorId !== 'string'
+    || !mongoose.isValidObjectId(doctorId)
+    || typeof date !== 'string'
+    || !/^\d{4}-\d{2}-\d{2}$/.test(date)
+    || typeof time !== 'string'
+    || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    || !isAppointmentType(type)
+    || !isAppointmentStatus(status)
+  ) {
+    return null
+  }
+
+  const parsedDate = new Date(`${date}T00:00:00Z`)
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) {
+    return null
+  }
+
+  return { patientId, doctorId, date, time, type, status }
+}
+
+function publicAppointment(appointment: {
+  _id: { toString: () => string }
+  patientId: { toString: () => string }
+  patientName: string
+  patientAge: number
+  doctorId: { toString: () => string }
+  doctorName: string
+  specialty: string
+  date: string
+  time: string
+  type: AppointmentType
+  status: AppointmentStatus
+}) {
+  return {
+    id: appointment._id.toString(),
+    patientId: appointment.patientId.toString(),
+    patient: appointment.patientName,
+    age: appointment.patientAge,
+    doctorId: appointment.doctorId.toString(),
+    doctor: appointment.doctorName,
+    specialty: appointment.specialty,
+    date: appointment.date,
+    time: appointment.time,
+    type: appointment.type,
+    status: appointment.status,
+  }
+}
+
+async function resolveAppointmentReferences(ownerId: string, input: AppointmentInput) {
+  const [patient, doctor] = await Promise.all([
+    Patient.findOne({ _id: input.patientId, owner: ownerId }),
+    Doctor.findOne({ _id: input.doctorId, owner: ownerId }),
+  ])
+  return { patient, doctor }
+}
+
+async function hasAppointmentConflict(
+  ownerId: string,
+  input: AppointmentInput,
+  excludedAppointmentId?: string,
+) {
+  const conflictFilter = {
+    owner: ownerId,
+    doctorId: input.doctorId,
+    date: input.date,
+    time: input.time,
+    status: { $ne: 'Anulată' },
+    ...(excludedAppointmentId ? { _id: { $ne: excludedAppointmentId } } : {}),
+  }
+  return Appointment.exists(conflictFilter)
+}
 
 function isPatientStatus(value: unknown): value is PatientStatus {
   return value === 'Activ' || value === 'Monitorizare' || value === 'Externat'
@@ -277,6 +374,114 @@ function getRequestUserId(request: express.Request, response: express.Response):
   response.status(401).json({ message: 'Autentifică-te pentru a gestiona medicii.' })
   return null
 }
+
+appointmentsRouter.get('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const appointments = await Appointment.find({ owner: ownerId }).sort({ date: 1, time: 1 })
+  response.json({ appointments: appointments.map(publicAppointment) })
+})
+
+appointmentsRouter.post('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const appointmentInput = parseAppointmentInput(request.body)
+  if (!appointmentInput) {
+    response.status(400).json({ message: 'Verifică pacientul, medicul, data, ora, tipul și statusul programării.' })
+    return
+  }
+
+  const { patient, doctor } = await resolveAppointmentReferences(ownerId, appointmentInput)
+  if (!patient || !doctor) {
+    response.status(400).json({ message: 'Selectează un pacient și un medic existenți în contul tău.' })
+    return
+  }
+
+  if (appointmentInput.status !== 'Anulată' && await hasAppointmentConflict(ownerId, appointmentInput)) {
+    response.status(409).json({ message: 'Medicul selectat are deja o programare la această dată și oră.' })
+    return
+  }
+
+  const appointment = await Appointment.create({
+    ...appointmentInput,
+    owner: ownerId,
+    patientName: patient.name,
+    patientAge: patient.age,
+    doctorName: doctor.name,
+    specialty: doctor.specialty,
+  })
+  response.status(201).json({ appointment: publicAppointment(appointment) })
+})
+
+appointmentsRouter.put('/:appointmentId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const appointmentId = request.params.appointmentId
+  if (!mongoose.isValidObjectId(appointmentId)) {
+    response.status(400).json({ message: 'Identificatorul programării nu este valid.' })
+    return
+  }
+
+  const appointmentInput = parseAppointmentInput(request.body)
+  if (!appointmentInput) {
+    response.status(400).json({ message: 'Verifică pacientul, medicul, data, ora, tipul și statusul programării.' })
+    return
+  }
+
+  const { patient, doctor } = await resolveAppointmentReferences(ownerId, appointmentInput)
+  if (!patient || !doctor) {
+    response.status(400).json({ message: 'Selectează un pacient și un medic existenți în contul tău.' })
+    return
+  }
+
+  if (
+    appointmentInput.status !== 'Anulată'
+    && await hasAppointmentConflict(ownerId, appointmentInput, appointmentId)
+  ) {
+    response.status(409).json({ message: 'Medicul selectat are deja o programare la această dată și oră.' })
+    return
+  }
+
+  const appointment = await Appointment.findOneAndUpdate(
+    { _id: appointmentId, owner: ownerId },
+    {
+      ...appointmentInput,
+      patientName: patient.name,
+      patientAge: patient.age,
+      doctorName: doctor.name,
+      specialty: doctor.specialty,
+    },
+    { new: true, runValidators: true },
+  )
+  if (!appointment) {
+    response.status(404).json({ message: 'Programarea nu a fost găsită în lista ta.' })
+    return
+  }
+
+  response.json({ appointment: publicAppointment(appointment) })
+})
+
+appointmentsRouter.delete('/:appointmentId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const appointmentId = request.params.appointmentId
+  if (!mongoose.isValidObjectId(appointmentId)) {
+    response.status(400).json({ message: 'Identificatorul programării nu este valid.' })
+    return
+  }
+
+  const appointment = await Appointment.findOneAndDelete({ _id: appointmentId, owner: ownerId })
+  if (!appointment) {
+    response.status(404).json({ message: 'Programarea nu a fost găsită în lista ta.' })
+    return
+  }
+
+  response.status(204).end()
+})
 
 patientsRouter.get('/', async (request, response) => {
   const ownerId = getRequestUserId(request, response)
@@ -595,6 +800,16 @@ app.use('/api/patients', (_request, response, next) => {
   next()
 })
 app.use('/api/patients', patientsRouter)
+
+app.use('/api/appointments', (_request, response, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    response.status(503).json({ message: 'Baza de date nu este conectată. Verifică MongoDB Atlas și încearcă din nou.' })
+    return
+  }
+
+  next()
+})
+app.use('/api/appointments', appointmentsRouter)
 
 const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
   console.error('Eroare neașteptată în API.', error)

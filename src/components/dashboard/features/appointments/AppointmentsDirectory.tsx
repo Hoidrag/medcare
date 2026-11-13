@@ -1,17 +1,27 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
-  createDemoCalendarAppointments,
-  demoDoctors,
-  demoPatients,
-  getLocalDateValue,
-  type DemoAppointment,
-  type DemoAppointmentStatus,
-  type DemoAppointmentType,
-} from '../shared/demoData'
+  createAppointment,
+  deleteAppointment,
+  getAppointments,
+  updateAppointment,
+  type Appointment,
+  type AppointmentInput,
+  type AppointmentStatus,
+  type AppointmentType,
+} from '../../../../services/appointments'
+import { getDoctors, type Doctor } from '../../../../services/doctors'
+import { getPatients, type Patient } from '../../../../services/patients'
 
-type AppointmentForm = Omit<DemoAppointment, 'id' | 'age'>
+type AppointmentForm = AppointmentInput
 
 const calendarWeekdays = ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum']
+
+function getLocalDateValue(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function getCalendarDays(month: Date) {
   const firstDay = new Date(month.getFullYear(), month.getMonth(), 1)
@@ -44,29 +54,32 @@ function formatSelectedDate(date: string) {
   }).format(new Date(`${date}T12:00:00`))
 }
 
-function getAppointmentStatusClass(status: DemoAppointmentStatus) {
+function getAppointmentStatusClass(status: AppointmentStatus) {
   if (status === 'Confirmată') return 'confirmed'
   if (status === 'Anulată') return 'cancelled'
   return 'pending'
 }
 
-function isAppointmentStatus(value: string): value is DemoAppointmentStatus {
+function isAppointmentStatus(value: string): value is AppointmentStatus {
   return value === 'Confirmată' || value === 'În așteptare' || value === 'Anulată'
 }
 
-function isAppointmentType(value: string): value is DemoAppointmentType {
+function isAppointmentType(value: string): value is AppointmentType {
   return value === 'Consultație' || value === 'Control' || value === 'Investigație'
 }
 
 const emptyForm = (): AppointmentForm => ({
-  patient: '',
-  doctor: demoDoctors[0].name,
-  specialty: demoDoctors[0].specialty,
+  patientId: '',
+  doctorId: '',
   date: getLocalDateValue(new Date()),
   time: '',
   type: 'Consultație',
   status: 'Confirmată',
 })
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Solicitarea nu a putut fi finalizată.'
+}
 
 type AppointmentsDirectoryProps = {
   query: string
@@ -74,18 +87,68 @@ type AppointmentsDirectoryProps = {
 
 export default function AppointmentsDirectory({ query }: AppointmentsDirectoryProps) {
   const [today] = useState(() => getLocalDateValue(new Date()))
-  const [appointments, setAppointments] = useState(createDemoCalendarAppointments)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [selectedDate, setSelectedDate] = useState(today)
   const [visibleMonth, setVisibleMonth] = useState(() => {
     const currentDate = new Date(`${today}T12:00:00`)
     return new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
   })
   const [form, setForm] = useState<AppointmentForm>(emptyForm)
-  const [editingAppointment, setEditingAppointment] = useState<DemoAppointment | null>(null)
-  const [appointmentToDelete, setAppointmentToDelete] = useState<DemoAppointment | null>(null)
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
+  const [appointmentToDelete, setAppointmentToDelete] = useState<Appointment | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formError, setFormError] = useState('')
+  const [requestError, setRequestError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [updatingAppointmentId, setUpdatingAppointmentId] = useState('')
   const [statusFilter, setStatusFilter] = useState('Toate statusurile')
+
+  const fetchDirectoryData = useCallback(() => Promise.all([
+    getAppointments(),
+    getPatients(),
+    getDoctors(),
+  ]), [])
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true)
+    setLoadError('')
+    try {
+      const [loadedAppointments, loadedPatients, loadedDoctors] = await fetchDirectoryData()
+      setAppointments(loadedAppointments)
+      setPatients(loadedPatients)
+      setDoctors(loadedDoctors)
+    } catch (error) {
+      setLoadError(getErrorMessage(error))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [fetchDirectoryData])
+
+  useEffect(() => {
+    let isCurrent = true
+    fetchDirectoryData()
+      .then(([loadedAppointments, loadedPatients, loadedDoctors]) => {
+        if (!isCurrent) return
+        setAppointments(loadedAppointments)
+        setPatients(loadedPatients)
+        setDoctors(loadedDoctors)
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) setLoadError(getErrorMessage(error))
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false)
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [fetchDirectoryData])
 
   const filteredAppointments = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ro')
@@ -101,7 +164,7 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
   }, [appointments, query, statusFilter])
 
   const calendarDays = useMemo(() => getCalendarDays(visibleMonth), [visibleMonth])
-  const appointmentsByDate = useMemo(() => filteredAppointments.reduce<Record<string, DemoAppointment[]>>(
+  const appointmentsByDate = useMemo(() => filteredAppointments.reduce<Record<string, Appointment[]>>(
     (appointmentsByDate, appointment) => {
       appointmentsByDate[appointment.date] ??= []
       appointmentsByDate[appointment.date].push(appointment)
@@ -126,47 +189,52 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
 
   function openCreateForm() {
     setEditingAppointment(null)
-    setForm({ ...emptyForm(), date: selectedDate })
+    setForm({
+      ...emptyForm(),
+      patientId: patients[0]?.id ?? '',
+      doctorId: doctors[0]?.id ?? '',
+      date: selectedDate,
+    })
     setFormError('')
+    setRequestError('')
     setIsFormOpen(true)
   }
 
-  function openEditForm(appointment: DemoAppointment) {
+  function openEditForm(appointment: Appointment) {
     setEditingAppointment(appointment)
     setForm({
-      patient: appointment.patient,
-      doctor: appointment.doctor,
-      specialty: appointment.specialty,
+      patientId: appointment.patientId,
+      doctorId: appointment.doctorId,
       date: appointment.date,
       time: appointment.time,
       type: appointment.type,
       status: appointment.status,
     })
     setFormError('')
+    setRequestError('')
     setIsFormOpen(true)
   }
 
-  function handleDoctorChange(doctorName: string) {
-    const doctor = demoDoctors.find((option) => option.name === doctorName)
-    if (!doctor) return
-    setForm((currentForm) => ({
-      ...currentForm,
-      doctor: doctor.name,
-      specialty: doctor.specialty,
-    }))
+  function handleDoctorChange(doctorId: string) {
+    setForm((currentForm) => ({ ...currentForm, doctorId }))
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const patientAge = demoPatients.find((patient) => patient.name === form.patient)?.age
-    if (patientAge === undefined) {
-      setFormError('Selectează un pacient din lista demonstrativă.')
+    setFormError('')
+    setRequestError('')
+    if (!patients.some((patient) => patient.id === form.patientId)) {
+      setFormError('Selectează un pacient salvat în baza de date.')
+      return
+    }
+    if (!doctors.some((doctor) => doctor.id === form.doctorId)) {
+      setFormError('Selectează un medic salvat în baza de date.')
       return
     }
 
     const conflictingAppointment = appointments.find((appointment) =>
       appointment.id !== editingAppointment?.id
-      && appointment.doctor === form.doctor
+      && appointment.doctorId === form.doctorId
       && appointment.date === form.date
       && appointment.time === form.time
       && appointment.status !== 'Anulată',
@@ -177,37 +245,64 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
       return
     }
 
-    if (editingAppointment) {
-      setAppointments((currentAppointments) => currentAppointments.map((appointment) =>
-        appointment.id === editingAppointment.id
-          ? { ...form, age: patientAge, id: appointment.id }
-          : appointment,
-      ))
-    } else {
-      setAppointments((currentAppointments) => [
-        { ...form, age: patientAge, id: `PROG-${crypto.randomUUID()}` },
-        ...currentAppointments,
-      ])
+    setIsSaving(true)
+    try {
+      const savedAppointment = editingAppointment
+        ? await updateAppointment(editingAppointment.id, form)
+        : await createAppointment(form)
+      setAppointments((currentAppointments) => editingAppointment
+        ? currentAppointments.map((appointment) => appointment.id === savedAppointment.id ? savedAppointment : appointment)
+        : [...currentAppointments, savedAppointment])
+      const appointmentDate = new Date(`${form.date}T12:00:00`)
+      setVisibleMonth(new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), 1))
+      setSelectedDate(form.date)
+      setIsFormOpen(false)
+      setEditingAppointment(null)
+    } catch (error) {
+      setRequestError(getErrorMessage(error))
+    } finally {
+      setIsSaving(false)
     }
-    const appointmentDate = new Date(`${form.date}T12:00:00`)
-    setVisibleMonth(new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), 1))
-    setSelectedDate(form.date)
-    setIsFormOpen(false)
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!appointmentToDelete) return
-    setAppointments((currentAppointments) =>
-      currentAppointments.filter((appointment) => appointment.id !== appointmentToDelete.id),
-    )
-    setAppointmentToDelete(null)
+    setIsDeleting(true)
+    setRequestError('')
+    try {
+      await deleteAppointment(appointmentToDelete.id)
+      setAppointments((currentAppointments) =>
+        currentAppointments.filter((appointment) => appointment.id !== appointmentToDelete.id),
+      )
+      setAppointmentToDelete(null)
+    } catch (error) {
+      setRequestError(getErrorMessage(error))
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
-  function updateStatus(appointment: DemoAppointment, value: string) {
+  async function updateStatus(appointment: Appointment, value: string) {
     if (!isAppointmentStatus(value)) return
-    setAppointments((currentAppointments) => currentAppointments.map((item) =>
-      item.id === appointment.id ? { ...item, status: value } : item,
-    ))
+    setUpdatingAppointmentId(appointment.id)
+    setRequestError('')
+    try {
+      const updatedAppointment = await updateAppointment(appointment.id, {
+        patientId: appointment.patientId,
+        doctorId: appointment.doctorId,
+        date: appointment.date,
+        time: appointment.time,
+        type: appointment.type,
+        status: value,
+      })
+      setAppointments((currentAppointments) => currentAppointments.map((item) =>
+        item.id === updatedAppointment.id ? updatedAppointment : item,
+      ))
+    } catch (error) {
+      setRequestError(getErrorMessage(error))
+    } finally {
+      setUpdatingAppointmentId('')
+    }
   }
 
   return (
@@ -218,10 +313,19 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
             <h2>Programările clinicii</h2>
             <p>Adaugă, actualizează și urmărește programările pacienților.</p>
           </div>
-          <button className="primary-action" type="button" onClick={openCreateForm}>
+          <button className="primary-action" type="button" onClick={openCreateForm} disabled={isLoading || Boolean(loadError)}>
             <span aria-hidden="true">＋</span> Adaugă programare
           </button>
         </div>
+
+        {isLoading && <p className="appointments-load-state" role="status">Se încarcă programările din baza de date...</p>}
+        {loadError && (
+          <div className="appointments-load-state appointments-load-error" role="alert">
+            <p>{loadError}</p>
+            <button type="button" onClick={() => void loadData()}>Reîncearcă</button>
+          </div>
+        )}
+        {requestError && <p className="appointments-request-error" role="alert">{requestError}</p>}
 
         <div className="appointments-toolbar">
           <div className="appointment-calendar-controls" role="group" aria-label="Navighează calendarul">
@@ -306,7 +410,11 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
                   </div>
                   <label className={`appointment-directory-status status-${getAppointmentStatusClass(appointment.status)}`}>
                     <span className="visually-hidden">Status pentru {appointment.patient}</span>
-                    <select value={appointment.status} onChange={(event) => updateStatus(appointment, event.target.value)}>
+                    <select
+                      value={appointment.status}
+                      disabled={updatingAppointmentId === appointment.id}
+                      onChange={(event) => void updateStatus(appointment, event.target.value)}
+                    >
                       <option>Confirmată</option>
                       <option>În așteptare</option>
                       <option>Anulată</option>
@@ -314,7 +422,17 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
                   </label>
                   <span className="appointment-row-actions">
                     <button type="button" onClick={() => openEditForm(appointment)} aria-label={`Editează programarea pentru ${appointment.patient}`}>Editează</button>
-                    <button type="button" className="appointment-delete-action" onClick={() => setAppointmentToDelete(appointment)} aria-label={`Șterge programarea pentru ${appointment.patient}`}>Șterge</button>
+                    <button
+                      type="button"
+                      className="appointment-delete-action"
+                      onClick={() => {
+                        setRequestError('')
+                        setAppointmentToDelete(appointment)
+                      }}
+                      aria-label={`Șterge programarea pentru ${appointment.patient}`}
+                    >
+                      Șterge
+                    </button>
                   </span>
                 </article>
               ))}
@@ -322,19 +440,25 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
                 <div className="appointment-agenda-empty">
                   <span aria-hidden="true">▦</span>
                   <strong>Zi fără programări</strong>
-                  <p>{filteredAppointments.length === 0 ? 'Nu există programări pentru filtrele selectate.' : 'Selectează o altă zi sau adaugă o programare nouă.'}</p>
+                  <p>
+                    {filteredAppointments.length === 0
+                      ? appointments.length === 0
+                        ? 'Nu există programări salvate. Adaugă prima programare.'
+                        : 'Nu există programări pentru filtrele selectate.'
+                      : 'Selectează o altă zi sau adaugă o programare nouă.'}
+                  </p>
                   <button type="button" onClick={openCreateForm}>＋ Adaugă programare</button>
                 </div>
               )}
             </div>
           </aside>
         </div>
-        <p className="appointments-demo-note">Date demonstrative — programările și modificările sunt temporare și nu se salvează în baza de date.</p>
+        <p className="appointments-demo-note">Programările și modificările sunt salvate în baza de date pentru contul autentificat.</p>
       </div>
 
       {isFormOpen && (
         <div className="patient-modal-backdrop" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setIsFormOpen(false)
+          if (event.target === event.currentTarget && !isSaving) setIsFormOpen(false)
         }}>
           <section className="patient-modal" role="dialog" aria-modal="true" aria-labelledby="appointment-form-title">
             <div className="patient-modal-heading">
@@ -342,26 +466,32 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
                 <h2 id="appointment-form-title">{editingAppointment ? 'Editează programarea' : 'Adaugă programare'}</h2>
                 <p>Alege pacientul, medicul și intervalul consultației.</p>
               </div>
-              <button type="button" className="patient-modal-close" onClick={() => setIsFormOpen(false)} aria-label="Închide">×</button>
+              <button type="button" className="patient-modal-close" onClick={() => setIsFormOpen(false)} aria-label="Închide" disabled={isSaving}>×</button>
             </div>
             <form onSubmit={handleSubmit}>
+              {(patients.length === 0 || doctors.length === 0) && (
+                <p className="patient-form-error" role="alert">
+                  Pentru a crea programări, adaugă mai întâi cel puțin un pacient și un medic în cont.
+                </p>
+              )}
               <label className="patient-form-field">
                 Pacient
-                <select required value={form.patient} onChange={(event) => setForm({ ...form, patient: event.target.value })}>
+                <select required value={form.patientId} onChange={(event) => setForm({ ...form, patientId: event.target.value })}>
                   <option value="">Selectează pacientul</option>
-                  {demoPatients.map((patient) => <option key={patient.id}>{patient.name}</option>)}
+                  {patients.map((patient) => <option key={patient.id} value={patient.id}>{patient.name}</option>)}
                 </select>
               </label>
               <label className="patient-form-field">
                 Medic
-                <select required value={form.doctor} onChange={(event) => handleDoctorChange(event.target.value)}>
-                  {demoDoctors.map((doctor) => <option key={doctor.name} value={doctor.name}>{doctor.name} — {doctor.specialty}</option>)}
+                <select required value={form.doctorId} onChange={(event) => handleDoctorChange(event.target.value)}>
+                  <option value="">Selectează medicul</option>
+                  {doctors.map((doctor) => <option key={doctor.id} value={doctor.id}>{doctor.name} — {doctor.specialty}</option>)}
                 </select>
               </label>
               <div className="patient-form-grid">
                 <label className="patient-form-field">
                   Data
-                  <input required type="date" min={today} value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} />
+                  <input required type="date" min={editingAppointment ? undefined : today} value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} />
                 </label>
                 <label className="patient-form-field">
                   Ora
@@ -395,9 +525,12 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
                 </label>
               </div>
               {formError && <p className="patient-form-error" role="alert">{formError}</p>}
+              {requestError && <p className="patient-form-error" role="alert">{requestError}</p>}
               <div className="patient-modal-actions">
-                <button className="secondary-action" type="button" onClick={() => setIsFormOpen(false)}>Anulează</button>
-                <button className="primary-action" type="submit">{editingAppointment ? 'Salvează modificările' : 'Adaugă programarea'}</button>
+                <button className="secondary-action" type="button" onClick={() => setIsFormOpen(false)} disabled={isSaving}>Anulează</button>
+                <button className="primary-action" type="submit" disabled={isSaving || patients.length === 0 || doctors.length === 0}>
+                  {isSaving ? 'Se salvează...' : editingAppointment ? 'Salvează modificările' : 'Adaugă programarea'}
+                </button>
               </div>
             </form>
           </section>
@@ -406,14 +539,17 @@ export default function AppointmentsDirectory({ query }: AppointmentsDirectoryPr
 
       {appointmentToDelete && (
         <div className="patient-modal-backdrop" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setAppointmentToDelete(null)
+          if (event.target === event.currentTarget && !isDeleting) setAppointmentToDelete(null)
         }}>
           <section className="patient-modal patient-delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="appointment-delete-title">
             <h2 id="appointment-delete-title">Ștergi programarea?</h2>
-            <p>Programarea pentru <strong>{appointmentToDelete.patient}</strong> din {formatAppointmentDate(appointmentToDelete.date)}, la ora {appointmentToDelete.time}, va fi eliminată din lista demonstrativă.</p>
+            <p>Programarea pentru <strong>{appointmentToDelete.patient}</strong> din {formatAppointmentDate(appointmentToDelete.date)}, la ora {appointmentToDelete.time}, va fi eliminată din baza de date.</p>
+            {requestError && <p className="patient-form-error" role="alert">{requestError}</p>}
             <div className="patient-modal-actions">
-              <button className="secondary-action" type="button" onClick={() => setAppointmentToDelete(null)}>Păstrează</button>
-              <button className="patient-confirm-delete" type="button" onClick={handleDelete}>Șterge programarea</button>
+              <button className="secondary-action" type="button" onClick={() => setAppointmentToDelete(null)} disabled={isDeleting}>Păstrează</button>
+              <button className="patient-confirm-delete" type="button" onClick={() => void handleDelete()} disabled={isDeleting}>
+                {isDeleting ? 'Se șterge...' : 'Șterge programarea'}
+              </button>
             </div>
           </section>
         </div>

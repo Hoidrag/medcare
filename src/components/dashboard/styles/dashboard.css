@@ -1454,7 +1454,8 @@
 }
 
 .doctors-load-state,
-.patients-load-state {
+.patients-load-state,
+.appointments-load-state {
   padding: 24px 16px;
   margin: 0;
   color: #718179;
@@ -1463,17 +1464,20 @@
 }
 
 .doctors-load-error,
-.patients-load-error {
+.patients-load-error,
+.appointments-load-error {
   color: #a6605e;
 }
 
 .doctors-load-error p,
-.patients-load-error p {
+.patients-load-error p,
+.appointments-load-error p {
   margin: 0 0 10px;
 }
 
 .doctors-load-error button,
-.patients-load-error button {
+.patients-load-error button,
+.appointments-load-error button {
   padding: 7px 10px;
   border: 1px solid #e6ece8;
   border-radius: 6px;
@@ -1856,6 +1860,14 @@
   margin: 0;
   color: #a64e4a;
   font-size: 11px;
+}
+
+.appointments-request-error {
+  padding: 10px 20px;
+  margin: 0;
+  color: #a64e4a;
+  background: #fdf6f5;
+  font-size: 12px;
 }
 
 .patient-modal-actions {
