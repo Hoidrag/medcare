@@ -8,6 +8,7 @@ type AuthState = {
   error: string | null
   authenticate: (mode: AuthMode, credentials: AuthCredentials) => Promise<AuthUser>
   logout: () => Promise<void>
+  updateUser: (user: AuthUser) => void
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -59,5 +60,9 @@ export function useAuth(): AuthState {
     setUser(null)
   }, [])
 
-  return { user, isLoading, error, authenticate, logout }
+  const updateUser = useCallback((updatedUser: AuthUser) => {
+    setUser(updatedUser)
+  }, [])
+
+  return { user, isLoading, error, authenticate, logout, updateUser }
 }

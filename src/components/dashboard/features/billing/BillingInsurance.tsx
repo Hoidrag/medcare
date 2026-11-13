@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import { formatDateForUser } from '../../../../utils/date'
 
 type InvoiceStatus = 'Achitată' | 'Neachitată' | 'Restantă'
 type PaymentMethod = 'Card' | 'Numerar' | 'Transfer bancar' | 'Asigurare'
@@ -87,11 +88,11 @@ function formatCurrency(value: number) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(new Date(`${value}T12:00:00`), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(`${value}T12:00:00`))
+  })
 }
 
 function downloadCsv(filename: string, rows: string[][]) {

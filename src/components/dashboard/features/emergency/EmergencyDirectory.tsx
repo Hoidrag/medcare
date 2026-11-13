@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import { formatDateForUser } from '../../../../utils/date'
 
 type EmergencyPriority = 'Critică' | 'Ridicată' | 'Moderată' | 'Scăzută'
 type EmergencyStatus = 'În așteptare' | 'În evaluare' | 'Internat' | 'Transferat' | 'Încheiat'
@@ -212,16 +213,16 @@ function isAdmissionStatus(value: string): value is AdmissionStatus {
 }
 
 function formatTime(value: string) {
-  return new Intl.DateTimeFormat('ro-RO', { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+  return formatDateForUser(new Date(value), { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(new Date(value), {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(value))
+  })
 }
 
 function getWaitingTime(arrivalAt: string) {

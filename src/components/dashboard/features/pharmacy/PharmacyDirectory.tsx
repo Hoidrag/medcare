@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { getLocalDateValue } from '../../../../utils/date'
+import { formatDateForUser, getLocalDateValue } from '../../../../utils/date'
 
 type PharmacyItem = {
   id: string
@@ -211,18 +211,18 @@ function getStockStatusClass(status: string) {
 }
 
 function formatExpiryDate(date: string) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(new Date(`${date}T12:00:00`), {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(`${date}T12:00:00`))
+  })
 }
 
 function formatMovementDate(date: string) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(new Date(`${date}T12:00:00`), {
     day: '2-digit',
     month: 'short',
-  }).format(new Date(`${date}T12:00:00`))
+  })
 }
 
 function isStockFilter(value: string): value is StockFilter {

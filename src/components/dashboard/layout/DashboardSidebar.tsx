@@ -21,7 +21,6 @@ const primaryItems = [
 const managementItems = [
   ['Farmacie', 'plus'],
   ['Urgențe și internări', 'pulse'],
-  ['Plăți', 'card'],
   ['Setări', 'settings'],
   ['Administrare', 'shield'],
 ] as const
@@ -36,7 +35,6 @@ const iconPaths = {
   wallet: 'M3 6.5A2.5 2.5 0 0 1 5.5 4H20v16H5a2 2 0 0 1-2-2zM3 7h17m-4 6h4m-3 0h.01',
   plus: 'M12 3v18M3 12h18',
   pulse: 'M3 12h4l3-8 4 16 3-8h4',
-  card: 'M3 5h18v14H3zM3 10h18m-14 5h4',
   settings: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.6-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.6l-.1-.2 1.6-2.8.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.6 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2Z',
   shield: 'M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Zm-3-11 2 2 4-4',
 } as const

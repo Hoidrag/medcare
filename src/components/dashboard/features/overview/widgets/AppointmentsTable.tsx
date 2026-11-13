@@ -1,5 +1,5 @@
 import type { Appointment } from '../../../../../services/appointments'
-import { getLocalDateValue } from '../../../../../utils/date'
+import { formatDateForUser, getLocalDateValue } from '../../../../../utils/date'
 
 const weekDays = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ']
 
@@ -16,7 +16,7 @@ function getWeekDates(today: Date) {
 }
 
 function formatDate(date: Date, options: Intl.DateTimeFormatOptions) {
-  return new Intl.DateTimeFormat('ro-RO', options).format(date)
+  return formatDateForUser(date, options)
 }
 
 type AppointmentsTableProps = {

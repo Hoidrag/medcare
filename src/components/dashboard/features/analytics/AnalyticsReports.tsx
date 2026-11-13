@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { formatDateForUser } from '../../../../utils/date'
 
 type AnalyticsPeriod = 'Ultimele 7 zile' | 'Ultimele 6 luni' | 'Anul acesta'
 
@@ -68,7 +69,7 @@ function getWeekDates(today: Date) {
     const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + index)
     return {
       label: weekdayNames[date.getDay()],
-      date: new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short' }).format(date),
+      date: formatDateForUser(date, { day: 'numeric', month: 'short' }),
       weekdayIndex: (date.getDay() + 6) % 7,
     }
   })

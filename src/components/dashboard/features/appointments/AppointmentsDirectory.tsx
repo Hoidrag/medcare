@@ -11,6 +11,7 @@ import {
 } from '../../../../services/appointments'
 import { getDoctors, type Doctor } from '../../../../services/doctors'
 import { getPatients, type Patient } from '../../../../services/patients'
+import { formatDateForUser } from '../../../../utils/date'
 
 type AppointmentForm = AppointmentInput
 
@@ -39,19 +40,19 @@ function getCalendarDays(month: Date) {
 }
 
 function formatAppointmentDate(date: string) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(new Date(`${date}T12:00:00`), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(`${date}T12:00:00`))
+  })
 }
 
 function formatSelectedDate(date: string) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(new Date(`${date}T12:00:00`), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }).format(new Date(`${date}T12:00:00`))
+  })
 }
 
 function getAppointmentStatusClass(status: AppointmentStatus) {

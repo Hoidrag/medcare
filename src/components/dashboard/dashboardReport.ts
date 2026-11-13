@@ -2,7 +2,7 @@ import type { Appointment } from '../../services/appointments'
 import type { Department } from '../../services/departments'
 import type { Doctor } from '../../services/doctors'
 import type { Patient } from '../../services/patients'
-import { getLocalDateValue } from '../../utils/date'
+import { formatDateForUser, getLocalDateValue } from '../../utils/date'
 
 export type DashboardReportData = {
   appointments: Appointment[]
@@ -34,13 +34,13 @@ function getAppointmentsBySpecialty(appointments: Appointment[]) {
 }
 
 function formatGeneratedAt(date: Date) {
-  return new Intl.DateTimeFormat('ro-RO', {
+  return formatDateForUser(date, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(date)
+  })
 }
 
 function downloadFile(filename: string, content: string, type: string) {

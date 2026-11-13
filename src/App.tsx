@@ -7,7 +7,7 @@ import type { AuthCredentials, AuthMode } from './types/auth'
 import './styles/auth-page.css'
 
 function App() {
-  const { user, isLoading, error, authenticate, logout } = useAuth()
+  const { user, isLoading, error, authenticate, logout, updateUser } = useAuth()
   const [isDashboard, setIsDashboard] = useState(
     () => window.location.pathname === '/dashboard',
   )
@@ -64,6 +64,7 @@ function App() {
     return (
       <DashboardPage
         user={user}
+        onUserUpdated={updateUser}
         onLogout={async () => {
           await logout()
           navigate('/')

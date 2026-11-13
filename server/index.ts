@@ -10,7 +10,7 @@ import { Appointment, type AppointmentStatus, type AppointmentType } from './mod
 import { Department, type DepartmentAccount, type DepartmentStatus } from './models/Department.js'
 import { Doctor, type DoctorAccount, type DoctorStatus } from './models/Doctor.js'
 import { Patient, type PatientAccount, type PatientStatus } from './models/Patient.js'
-import { User } from './models/User.js'
+import { User, type ClinicDayName, type UserSettings } from './models/User.js'
 
 const sessionSecret = process.env.SESSION_SECRET
 const mongoUri = process.env.MONGODB_URI
@@ -115,6 +115,156 @@ function isValidEmail(email: string) {
   return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+const clinicDays: ClinicDayName[] = [
+  'Luni',
+  'Marți',
+  'Miercuri',
+  'Joi',
+  'Vineri',
+  'Sâmbătă',
+  'Duminică',
+]
+
+function isClinicDay(value: unknown): value is ClinicDayName {
+  return clinicDays.some((day) => day === value)
+}
+
+function parseUserSettings(value: unknown): UserSettings | null {
+  if (
+    !isRecord(value)
+    || !isRecord(value.clinicProfile)
+    || !isRecord(value.notifications)
+    || !isRecord(value.preferences)
+    || !Array.isArray(value.workingHours)
+    || value.workingHours.length !== clinicDays.length
+  ) {
+    return null
+  }
+
+  const { clinicProfile, notifications, preferences, workingHours } = value
+  const { name, address, phone, email, logoUrl } = clinicProfile
+  if (
+    typeof name !== 'string'
+    || typeof address !== 'string'
+    || typeof phone !== 'string'
+    || typeof email !== 'string'
+    || typeof logoUrl !== 'string'
+    || typeof notifications.appointments !== 'boolean'
+    || typeof notifications.pharmacy !== 'boolean'
+    || typeof notifications.emergencies !== 'boolean'
+    || (preferences.theme !== 'light' && preferences.theme !== 'dark')
+    || preferences.language !== 'ro'
+    || (preferences.dateFormat !== 'long'
+      && preferences.dateFormat !== 'dd.MM.yyyy'
+      && preferences.dateFormat !== 'dd/MM/yyyy')
+  ) {
+    return null
+  }
+
+  const normalizedProfile = {
+    name: name.trim(),
+    address: address.trim(),
+    phone: phone.trim(),
+    email: email.trim().toLowerCase(),
+    logoUrl: logoUrl.trim(),
+  }
+  if (
+    normalizedProfile.name.length > 120
+    || normalizedProfile.address.length > 200
+    || normalizedProfile.phone.length > 30
+    || normalizedProfile.email.length > 254
+    || (normalizedProfile.email !== '' && !isValidEmail(normalizedProfile.email))
+    || normalizedProfile.logoUrl.length > 500
+  ) {
+    return null
+  }
+
+  if (normalizedProfile.logoUrl) {
+    try {
+      const logoUrlObject = new URL(normalizedProfile.logoUrl)
+      if (
+        (logoUrlObject.protocol !== 'http:' && logoUrlObject.protocol !== 'https:')
+        || logoUrlObject.username
+        || logoUrlObject.password
+      ) {
+        return null
+      }
+    } catch {
+      return null
+    }
+  }
+
+  const parsedHours: UserSettings['workingHours'] = []
+  for (const [index, entry] of workingHours.entries()) {
+    if (
+      !isRecord(entry)
+      || !isClinicDay(entry.day)
+      || entry.day !== clinicDays[index]
+      || typeof entry.isOpen !== 'boolean'
+      || typeof entry.start !== 'string'
+      || typeof entry.end !== 'string'
+    ) {
+      return null
+    }
+
+    const start = entry.start.trim()
+    const end = entry.end.trim()
+    const validTime = (time: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    if (entry.isOpen && (!validTime(start) || !validTime(end) || start >= end)) {
+      return null
+    }
+    if (!entry.isOpen && ((start && !validTime(start)) || (end && !validTime(end)))) {
+      return null
+    }
+
+    parsedHours.push({ day: entry.day, isOpen: entry.isOpen, start, end })
+  }
+
+  return {
+    clinicProfile: normalizedProfile,
+    workingHours: parsedHours,
+    notifications: {
+      appointments: notifications.appointments,
+      pharmacy: notifications.pharmacy,
+      emergencies: notifications.emergencies,
+    },
+    preferences: {
+      theme: preferences.theme,
+      language: preferences.language,
+      dateFormat: preferences.dateFormat,
+    },
+  }
+}
+
+function publicSettings(settings: UserSettings): UserSettings {
+  const savedHours = new Map(settings.workingHours.map((hours) => [hours.day, hours]))
+  return {
+    clinicProfile: {
+      name: settings.clinicProfile?.name ?? '',
+      address: settings.clinicProfile?.address ?? '',
+      phone: settings.clinicProfile?.phone ?? '',
+      email: settings.clinicProfile?.email ?? '',
+      logoUrl: settings.clinicProfile?.logoUrl ?? '',
+    },
+    workingHours: clinicDays.map((day) => {
+      const hours = savedHours.get(day)
+      return hours
+        ? { day, isOpen: hours.isOpen, start: hours.start, end: hours.end }
+        : { day, isOpen: false, start: '', end: '' }
+    }),
+    notifications: {
+      appointments: settings.notifications?.appointments ?? true,
+      pharmacy: settings.notifications?.pharmacy ?? true,
+      emergencies: settings.notifications?.emergencies ?? true,
+    },
+    preferences: {
+      theme: settings.preferences?.theme ?? 'light',
+      language: settings.preferences?.language ?? 'ro',
+      dateFormat: settings.preferences?.dateFormat ?? 'long',
+    },
+  }
+}
+
 function isDuplicateKeyError(error: unknown): boolean {
   return isRecord(error) && error.code === 11000
 }
@@ -130,6 +280,27 @@ function regenerateSession(request: express.Request) {
       resolve()
     })
   })
+}
+
+function saveSession(request: express.Request) {
+  return new Promise<void>((resolve, reject) => {
+    request.session.save((error) => {
+      if (error) {
+        reject(error)
+        return
+      }
+
+      resolve()
+    })
+  })
+}
+
+function getAuthenticatedUserId(request: express.Request, response: express.Response): string | null {
+  const userId = request.session.userId
+  if (userId) return userId
+
+  response.status(401).json({ message: 'Autentifică-te pentru a modifica setările contului.' })
+  return null
 }
 
 const authRouter = express.Router()
@@ -940,6 +1111,143 @@ authRouter.get('/me', async (request, response) => {
   }
 
   response.json({ user: publicUser(user) })
+})
+
+authRouter.get('/settings', async (request, response) => {
+  const userId = getAuthenticatedUserId(request, response)
+  if (!userId) return
+
+  const user = await User.findById(userId)
+  if (!user) {
+    response.status(401).json({ message: 'Contul nu mai există. Autentifică-te din nou.' })
+    return
+  }
+
+  response.json({ settings: publicSettings(user.settings) })
+})
+
+authRouter.put('/settings', async (request, response) => {
+  const userId = getAuthenticatedUserId(request, response)
+  if (!userId) return
+
+  const settings = parseUserSettings(request.body)
+  if (!settings) {
+    response.status(400).json({ message: 'Verifică datele profilului, programul și preferințele introduse.' })
+    return
+  }
+
+  const user = await User.findById(userId)
+  if (!user) {
+    response.status(401).json({ message: 'Contul nu mai există. Autentifică-te din nou.' })
+    return
+  }
+
+  user.settings = settings
+  await user.save()
+  response.json({ settings: publicSettings(user.settings) })
+})
+
+authRouter.patch('/account', authRateLimit, async (request, response) => {
+  const userId = getAuthenticatedUserId(request, response)
+  if (!userId) return
+
+  if (
+    !isRecord(request.body)
+    || typeof request.body.name !== 'string'
+    || typeof request.body.email !== 'string'
+    || typeof request.body.currentPassword !== 'string'
+  ) {
+    response.status(400).json({ message: 'Completează numele, e-mailul și parola curentă.' })
+    return
+  }
+
+  const name = request.body.name.trim()
+  const email = request.body.email.trim().toLowerCase()
+  const currentPassword = request.body.currentPassword
+  if (name.length < 2 || name.length > 80) {
+    response.status(400).json({ message: 'Numele trebuie să aibă între 2 și 80 de caractere.' })
+    return
+  }
+  if (!isValidEmail(email)) {
+    response.status(400).json({ message: 'Introdu o adresă de e-mail validă.' })
+    return
+  }
+  if (currentPassword.length === 0 || Buffer.byteLength(currentPassword, 'utf8') > 72) {
+    response.status(400).json({ message: 'Introdu parola curentă pentru a salva datele contului.' })
+    return
+  }
+
+  const user = await User.findById(userId).select('+passwordHash')
+  if (!user) {
+    response.status(401).json({ message: 'Contul nu mai există. Autentifică-te din nou.' })
+    return
+  }
+  if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
+    response.status(400).json({ message: 'Parola curentă este incorectă.' })
+    return
+  }
+
+  user.name = name
+  user.email = email
+  try {
+    await user.save()
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      response.status(409).json({ message: 'Există deja un cont asociat acestei adrese de e-mail.' })
+      return
+    }
+
+    throw error
+  }
+
+  response.json({ user: publicUser(user) })
+})
+
+authRouter.patch('/password', authRateLimit, async (request, response) => {
+  const userId = getAuthenticatedUserId(request, response)
+  if (!userId) return
+
+  if (
+    !isRecord(request.body)
+    || typeof request.body.currentPassword !== 'string'
+    || typeof request.body.newPassword !== 'string'
+  ) {
+    response.status(400).json({ message: 'Completează parola curentă și parola nouă.' })
+    return
+  }
+
+  const { currentPassword, newPassword } = request.body
+  if (
+    currentPassword.length === 0
+    || Buffer.byteLength(currentPassword, 'utf8') > 72
+    || newPassword.length < 8
+    || Buffer.byteLength(newPassword, 'utf8') > 72
+  ) {
+    response.status(400).json({ message: 'Parola nouă trebuie să aibă cel puțin 8 caractere și maximum 72 de octeți.' })
+    return
+  }
+
+  const user = await User.findById(userId).select('+passwordHash')
+  if (!user) {
+    response.status(401).json({ message: 'Contul nu mai există. Autentifică-te din nou.' })
+    return
+  }
+  if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
+    response.status(400).json({ message: 'Parola curentă este incorectă.' })
+    return
+  }
+  if (await bcrypt.compare(newPassword, user.passwordHash)) {
+    response.status(400).json({ message: 'Alege o parolă nouă, diferită de cea actuală.' })
+    return
+  }
+
+  user.passwordHash = await bcrypt.hash(newPassword, 12)
+  await user.save()
+
+  await regenerateSession(request)
+  request.session.userId = user.id
+  await saveSession(request)
+  response.json({ message: 'Parola a fost schimbată și salvată în baza de date.' })
 })
 
 authRouter.post('/logout', (request, response, next) => {
