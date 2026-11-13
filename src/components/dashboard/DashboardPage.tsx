@@ -38,7 +38,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente' && item !== 'Analize și rapoarte' && item !== 'Facturare și asigurări') {
+    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente' && item !== 'Farmacie' && item !== 'Analize și rapoarte' && item !== 'Facturare și asigurări') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -122,6 +122,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                       ? 'Caută pacient, medic sau tip de vizită...'
                       : activeItem === 'Departamente'
                         ? 'Caută departament, medic sau locație...'
+                        : activeItem === 'Farmacie'
+                          ? 'Caută medicament, lot sau furnizor...'
                         : activeItem === 'Analize și rapoarte'
                           ? 'Caută medic sau departament în rapoarte...'
                           : activeItem === 'Facturare și asigurări'
@@ -177,6 +179,8 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
                       ? 'Planifică și urmărește consultațiile din clinică.'
                       : activeItem === 'Departamente'
                         ? 'Explorează specialitățile, echipele și organizarea clinicii.'
+                        : activeItem === 'Farmacie'
+                          ? 'Gestionează stocurile, loturile și datele de expirare.'
                         : activeItem === 'Analize și rapoarte'
                           ? 'Urmărește indicatorii clinici și explorează activitatea agregată.'
                           : activeItem === 'Facturare și asigurări'
