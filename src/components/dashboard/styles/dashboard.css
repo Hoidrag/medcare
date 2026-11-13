@@ -5015,3 +5015,499 @@
     max-width: 180px;
   }
 }
+
+.emergency-directory {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.emergency-demo-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  border: 1px solid #e8dfc7;
+  border-radius: 9px;
+  color: #8d7449;
+  background: #fbf8ef;
+}
+
+.emergency-demo-banner > span {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #f2ead5;
+  font-size: 13px;
+}
+
+.emergency-demo-banner p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.emergency-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.emergency-summary-card {
+  display: flex;
+  min-width: 0;
+  min-height: 76px;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+}
+
+.emergency-summary-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+  color: #a45b59;
+  background: #fbefed;
+  font-size: 16px;
+}
+
+.emergency-summary-icon.summary-amber {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.emergency-summary-icon.summary-blue {
+  color: #578093;
+  background: #edf5f6;
+}
+
+.emergency-summary-icon.summary-green {
+  color: #548969;
+  background: #edf7ef;
+}
+
+.emergency-summary-card > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.emergency-summary-card strong {
+  color: #2f493c;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.emergency-summary-card small {
+  overflow: hidden;
+  color: #829188;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emergency-tabs {
+  display: flex;
+  gap: 7px;
+  padding: 0 2px;
+  border-bottom: 1px solid #e3ebe5;
+}
+
+.emergency-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #809087;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.emergency-tabs button.active {
+  border-bottom-color: #3b8061;
+  color: #3d7155;
+}
+
+.emergency-tabs button span {
+  display: grid;
+  min-width: 21px;
+  height: 21px;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: #6d8075;
+  background: #eff4f0;
+  font-size: 10px;
+}
+
+.emergency-workspace {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.emergency-workspace-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.emergency-workspace-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 17px 19px;
+}
+
+.emergency-workspace-heading h2 {
+  margin: 0;
+  color: #354d41;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.emergency-workspace-heading p {
+  margin: 5px 0 0;
+  color: #89978f;
+  font-size: 12px;
+}
+
+.emergency-workspace-heading > strong {
+  color: #476d55;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.emergency-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 19px;
+  border-top: 1px solid #edf1ee;
+  border-bottom: 1px solid #edf1ee;
+  color: #829188;
+  font-size: 12px;
+}
+
+.emergency-toolbar select {
+  min-width: 170px;
+  height: 34px;
+  padding: 0 27px 0 10px;
+  border: 1px solid #e3ebe5;
+  border-radius: 7px;
+  outline: 0;
+  color: #62766a;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+}
+
+.emergency-toolbar select:focus {
+  border-color: #80ae91;
+  box-shadow: 0 0 0 3px rgba(80, 142, 102, .1);
+}
+
+.emergency-table-scroll {
+  overflow-x: auto;
+}
+
+.emergency-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admission-table {
+  min-width: 910px;
+}
+
+.emergency-table th {
+  padding: 11px 10px;
+  color: #91a098;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .45px;
+  white-space: nowrap;
+}
+
+.emergency-table td {
+  padding: 11px 10px;
+  border-top: 1px solid #f0f3f1;
+  color: #64776c;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.emergency-table tbody tr:hover {
+  background: #fafcfb;
+}
+
+.emergency-patient-cell,
+.emergency-ward-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.emergency-patient-cell strong,
+.emergency-ward-cell strong {
+  color: #435b4c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.emergency-patient-cell small,
+.emergency-ward-cell small {
+  color: #89978f;
+  font-size: 11px;
+}
+
+.emergency-priority {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.emergency-priority-critical,
+.emergency-priority-high {
+  color: #a45b59;
+  background: #fbefed;
+}
+
+.emergency-priority-medium {
+  color: #a1834e;
+  background: #faf5e9;
+}
+
+.emergency-priority-low {
+  color: #62806d;
+  background: #eff6f0;
+}
+
+.emergency-case-status,
+.admission-status {
+  height: 29px;
+  padding: 0 25px 0 8px;
+  border: 1px solid #e5ece7;
+  border-radius: 7px;
+  outline: 0;
+  background-color: #fff;
+  font: inherit;
+  font-size: 11px;
+}
+
+.emergency-case-status-waiting {
+  color: #a1834e;
+  background-color: #faf5e9;
+}
+
+.emergency-case-status-review,
+.admission-status-transfer {
+  color: #578093;
+  background-color: #eff5f7;
+}
+
+.emergency-case-status-resolved,
+.emergency-case-status-closed,
+.admission-status-discharged {
+  color: #678273;
+  background-color: #f0f6f1;
+}
+
+.admission-status-active {
+  color: #568366;
+  background-color: #f0f7f1;
+}
+
+.admission-status:disabled {
+  cursor: not-allowed;
+  opacity: .8;
+}
+
+.emergency-edit-button,
+.admission-row-actions button {
+  padding: 6px 8px;
+  border: 1px solid #e6ece8;
+  border-radius: 6px;
+  color: #527a61;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.emergency-edit-button:hover,
+.admission-row-actions button:hover {
+  background: #f5faf6;
+}
+
+.emergency-empty-cell {
+  padding: 28px 12px !important;
+  color: #87958e !important;
+  text-align: center;
+}
+
+.emergency-workspace-note {
+  padding: 11px 19px;
+  margin: 0;
+  border-top: 1px solid #edf1ee;
+  color: #909d95;
+  font-size: 11px;
+}
+
+.emergency-row-actions,
+.admission-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admission-row-actions .admission-discharge-button {
+  color: #a6605e;
+}
+
+.emergency-ward-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.emergency-ward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 18px;
+  padding: 0 19px 19px;
+}
+
+.emergency-ward-item {
+  display: grid;
+  gap: 8px;
+}
+
+.emergency-ward-item > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.emergency-ward-item strong {
+  overflow: hidden;
+  color: #546a5c;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emergency-ward-item span {
+  color: #89978f;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.emergency-ward-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2ee;
+}
+
+.emergency-ward-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #6eaa82;
+}
+
+.emergency-modal {
+  width: min(100%, 560px);
+}
+
+@media (max-width: 900px) {
+  .emergency-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .emergency-ward-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .emergency-demo-banner {
+    align-items: flex-start;
+  }
+
+  .emergency-demo-banner p {
+    font-size: 11px;
+  }
+
+  .emergency-summary-card {
+    min-height: 62px;
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .emergency-summary-icon {
+    width: 31px;
+    height: 31px;
+  }
+
+  .emergency-summary-card strong {
+    font-size: 18px;
+  }
+
+  .emergency-summary-card small {
+    font-size: 10px;
+  }
+
+  .emergency-workspace-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .emergency-workspace-heading .primary-action {
+    width: 100%;
+  }
+
+  .emergency-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 10px 15px;
+  }
+
+  .emergency-toolbar select {
+    width: 100%;
+  }
+
+  .emergency-ward-grid {
+    grid-template-columns: 1fr;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .emergency-workspace-note {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+}
