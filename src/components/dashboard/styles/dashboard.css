@@ -2678,10 +2678,39 @@
   text-align: center;
 }
 
-.departments-demo-note {
+.departments-info-note {
   margin: -4px 0 0;
   color: #98a49d;
   font-size: 10px;
+}
+
+.departments-load-state {
+  padding: 24px 16px;
+  margin: 0;
+  color: #718179;
+  font-size: 12px;
+  text-align: center;
+}
+
+.departments-load-error p {
+  margin: 0 0 10px;
+  color: #a6605e;
+}
+
+.departments-load-error button {
+  padding: 7px 10px;
+  border: 1px solid #e6ece8;
+  border-radius: 6px;
+  color: #527a61;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.department-request-error {
+  margin: 0;
+  color: #a64e4a;
+  font-size: 12px;
 }
 
 .analytics-reports {
@@ -4275,7 +4304,7 @@
   font-size: 18px;
 }
 
-.departments-directory .departments-demo-note,
+.departments-directory .departments-info-note,
 .departments-directory .primary-action {
   font-size: 11px;
 }

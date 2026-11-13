@@ -1,15 +1,36 @@
-import { useMemo, useState, type FormEvent } from 'react'
-import { demoDepartments, type DemoDepartment, type DemoDepartmentStatus } from '../shared/demoData'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import {
+  createDepartment,
+  deleteDepartment,
+  getDepartments,
+  updateDepartment,
+  type Department,
+  type DepartmentInput,
+  type DepartmentStatus,
+} from '../../../../services/departments'
 
-type DepartmentForm = Omit<DemoDepartment, 'id' | 'doctors' | 'tone'> & {
+type DepartmentForm = Omit<DepartmentInput, 'doctors'> & {
   doctors: string
 }
 
-function isDepartmentStatus(value: string): value is DemoDepartmentStatus {
+type DepartmentTone = 'green' | 'blue' | 'amber' | 'rose'
+
+function isDepartmentStatus(value: string): value is DepartmentStatus {
   return value === 'Activ' || value === 'Program limitat' || value === 'În amenajare'
 }
 
-const emptyForm: DepartmentForm = {
+function getDepartmentTone(id: string): DepartmentTone {
+  const tones: DepartmentTone[] = ['green', 'blue', 'amber', 'rose']
+  const toneIndex = [...id].reduce((total, character) => total + character.charCodeAt(0), 0)
+    % tones.length
+  return tones[toneIndex]
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Solicitarea nu a putut fi finalizată.'
+}
+
+const emptyForm = (): DepartmentForm => ({
   name: '',
   description: '',
   location: '',
@@ -18,20 +39,55 @@ const emptyForm: DepartmentForm = {
   appointmentCount: 0,
   status: 'Activ',
   doctors: '',
-}
+})
 
 type DepartmentsDirectoryProps = {
   query: string
 }
 
 export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProps) {
-  const [departments, setDepartments] = useState<DemoDepartment[]>(demoDepartments)
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [expandedDepartmentId, setExpandedDepartmentId] = useState<string | null>(null)
-  const [editingDepartment, setEditingDepartment] = useState<DemoDepartment | null>(null)
-  const [departmentToDelete, setDepartmentToDelete] = useState<DemoDepartment | null>(null)
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
+  const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null)
   const [form, setForm] = useState<DepartmentForm>(emptyForm)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formError, setFormError] = useState('')
+  const [requestError, setRequestError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const loadDepartments = useCallback(async () => {
+    setIsLoading(true)
+    setLoadError('')
+    try {
+      setDepartments(await getDepartments())
+    } catch (error) {
+      setLoadError(getErrorMessage(error))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    let isCurrent = true
+    getDepartments()
+      .then((loadedDepartments) => {
+        if (isCurrent) setDepartments(loadedDepartments)
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) setLoadError(getErrorMessage(error))
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false)
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [])
 
   const filteredDepartments = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ro')
@@ -43,18 +99,20 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
     )
   }, [departments, query])
 
+  const statsUnavailable = isLoading || Boolean(loadError)
   const activeCount = departments.filter((department) => department.status === 'Activ').length
   const totalDoctors = departments.reduce((total, department) => total + department.doctorCount, 0)
   const totalAppointments = departments.reduce((total, department) => total + department.appointmentCount, 0)
 
   function openCreateForm() {
     setEditingDepartment(null)
-    setForm(emptyForm)
+    setForm(emptyForm())
     setFormError('')
+    setRequestError('')
     setIsFormOpen(true)
   }
 
-  function openEditForm(department: DemoDepartment) {
+  function openEditForm(department: Department) {
     setEditingDepartment(department)
     setForm({
       name: department.name,
@@ -67,13 +125,22 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
       doctors: department.doctors.join(', '),
     })
     setFormError('')
+    setRequestError('')
     setIsFormOpen(true)
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setFormError('')
+    setRequestError('')
+    const name = form.name.trim()
+    if (name.length < 2) {
+      setFormError('Numele departamentului trebuie să aibă cel puțin 2 caractere.')
+      return
+    }
+
     const nameExists = departments.some((department) =>
-      department.name.toLocaleLowerCase('ro') === form.name.trim().toLocaleLowerCase('ro')
+      department.name.toLocaleLowerCase('ro') === name.toLocaleLowerCase('ro')
       && department.id !== editingDepartment?.id,
     )
     if (nameExists) {
@@ -81,39 +148,50 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
       return
     }
 
-    const tone: DemoDepartment['tone'] = editingDepartment?.tone ?? 'green'
-    const departmentData = {
-      ...form,
-      name: form.name.trim(),
+    const departmentInput: DepartmentInput = {
+      name,
       description: form.description.trim(),
       location: form.location.trim(),
       schedule: form.schedule.trim(),
+      doctorCount: form.doctorCount,
+      appointmentCount: form.appointmentCount,
+      status: form.status,
       doctors: form.doctors.split(',').map((doctor) => doctor.trim()).filter(Boolean),
-      tone,
     }
 
-    if (editingDepartment) {
-      setDepartments((currentDepartments) => currentDepartments.map((department) =>
-        department.id === editingDepartment.id
-          ? { ...departmentData, id: department.id }
-          : department,
-      ))
-    } else {
-      setDepartments((currentDepartments) => [
-        { ...departmentData, id: `DEP-${crypto.randomUUID()}` },
-        ...currentDepartments,
-      ])
+    setIsSaving(true)
+    try {
+      const savedDepartment = editingDepartment
+        ? await updateDepartment(editingDepartment.id, departmentInput)
+        : await createDepartment(departmentInput)
+      setDepartments((currentDepartments) => editingDepartment
+        ? currentDepartments.map((department) => department.id === savedDepartment.id ? savedDepartment : department)
+        : [...currentDepartments, savedDepartment])
+      setIsFormOpen(false)
+      setEditingDepartment(null)
+    } catch (error) {
+      setRequestError(getErrorMessage(error))
+    } finally {
+      setIsSaving(false)
     }
-    setIsFormOpen(false)
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!departmentToDelete) return
-    setDepartments((currentDepartments) =>
-      currentDepartments.filter((department) => department.id !== departmentToDelete.id),
-    )
-    if (expandedDepartmentId === departmentToDelete.id) setExpandedDepartmentId(null)
-    setDepartmentToDelete(null)
+    setIsDeleting(true)
+    setRequestError('')
+    try {
+      await deleteDepartment(departmentToDelete.id)
+      setDepartments((currentDepartments) =>
+        currentDepartments.filter((department) => department.id !== departmentToDelete.id),
+      )
+      if (expandedDepartmentId === departmentToDelete.id) setExpandedDepartmentId(null)
+      setDepartmentToDelete(null)
+    } catch (error) {
+      setRequestError(getErrorMessage(error))
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
@@ -121,19 +199,19 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
       <div className="departments-summary">
         <article className="dashboard-card department-summary-card">
           <span className="department-summary-icon">✚</span>
-          <span><strong>{departments.length}</strong><small>Departamente în clinică</small></span>
+          <span><strong>{statsUnavailable ? '—' : departments.length}</strong><small>Departamente în clinică</small></span>
         </article>
         <article className="dashboard-card department-summary-card">
           <span className="department-summary-icon summary-green">●</span>
-          <span><strong>{activeCount}</strong><small>Departamente active</small></span>
+          <span><strong>{statsUnavailable ? '—' : activeCount}</strong><small>Departamente active</small></span>
         </article>
         <article className="dashboard-card department-summary-card">
           <span className="department-summary-icon summary-blue">♙</span>
-          <span><strong>{totalDoctors}</strong><small>Medici repartizați</small></span>
+          <span><strong>{statsUnavailable ? '—' : totalDoctors}</strong><small>Medici repartizați</small></span>
         </article>
         <article className="dashboard-card department-summary-card">
           <span className="department-summary-icon summary-amber">▦</span>
-          <span><strong>{totalAppointments}</strong><small>Programări în evidență</small></span>
+          <span><strong>{statsUnavailable ? '—' : totalAppointments}</strong><small>Programări în evidență</small></span>
         </article>
       </div>
 
@@ -142,12 +220,19 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
           <h2>Departamentele clinicii</h2>
           <p>Specialități, locații și activitatea echipelor medicale.</p>
         </div>
-        <button className="primary-action" type="button" onClick={openCreateForm}>
+        <button className="primary-action" type="button" onClick={openCreateForm} disabled={isLoading || Boolean(loadError)}>
           <span aria-hidden="true">＋</span> Adaugă departament
         </button>
       </div>
 
-      {filteredDepartments.length > 0 ? (
+      {isLoading ? (
+        <p className="departments-load-state" role="status">Se încarcă departamentele din baza de date...</p>
+      ) : loadError ? (
+        <div className="dashboard-card departments-empty departments-load-error" role="alert">
+          <p>{loadError}</p>
+          <button type="button" onClick={() => void loadDepartments()}>Reîncearcă</button>
+        </div>
+      ) : filteredDepartments.length > 0 ? (
         <div className="departments-grid">
           {filteredDepartments.map((department) => {
             const isExpanded = expandedDepartmentId === department.id
@@ -159,7 +244,7 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
             return (
               <article className="dashboard-card department-card" key={department.id}>
                 <div className="department-card-top">
-                  <span className={`department-icon department-icon-${department.tone}`} aria-hidden="true">✚</span>
+                  <span className={`department-icon department-icon-${getDepartmentTone(department.id)}`} aria-hidden="true">✚</span>
                   <span className={`department-status department-status-${statusClass}`}><i />{department.status}</span>
                 </div>
                 <h3>{department.name}</h3>
@@ -195,22 +280,27 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
         </div>
       ) : (
         <div className="dashboard-card departments-empty">
-          Nu am găsit departamente pentru „{query}”.
+          {departments.length === 0
+            ? 'Nu există departamente salvate. Adaugă primul departament.'
+            : `Nu am găsit departamente pentru „${query}”.`}
         </div>
       )}
-      <p className="departments-demo-note">Date demonstrative — numărul personalului și al programărilor nu este conectat la date reale.</p>
+      {requestError && !isFormOpen && !departmentToDelete && (
+        <p className="department-request-error" role="alert">{requestError}</p>
+      )}
+      <p className="departments-info-note">Departamentele și modificările sunt salvate în baza de date pentru contul autentificat.</p>
 
       {isFormOpen && (
         <div className="patient-modal-backdrop" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setIsFormOpen(false)
+          if (event.target === event.currentTarget && !isSaving) setIsFormOpen(false)
         }}>
           <section className="patient-modal" role="dialog" aria-modal="true" aria-labelledby="department-form-title">
             <div className="patient-modal-heading">
               <div>
                 <h2 id="department-form-title">{editingDepartment ? 'Editează departamentul' : 'Adaugă departament'}</h2>
-                <p>Completează informațiile demonstrative despre departament.</p>
+                <p>Completează informațiile departamentului.</p>
               </div>
-              <button type="button" className="patient-modal-close" onClick={() => setIsFormOpen(false)} aria-label="Închide">×</button>
+              <button type="button" className="patient-modal-close" onClick={() => setIsFormOpen(false)} aria-label="Închide" disabled={isSaving}>×</button>
             </div>
             <form onSubmit={handleSubmit}>
               <label className="patient-form-field">
@@ -256,9 +346,12 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
                 </select>
               </label>
               {formError && <p className="patient-form-error" role="alert">{formError}</p>}
+              {requestError && <p className="patient-form-error" role="alert">{requestError}</p>}
               <div className="patient-modal-actions">
-                <button className="secondary-action" type="button" onClick={() => setIsFormOpen(false)}>Anulează</button>
-                <button className="primary-action" type="submit">{editingDepartment ? 'Salvează modificările' : 'Adaugă departamentul'}</button>
+                <button className="secondary-action" type="button" onClick={() => setIsFormOpen(false)} disabled={isSaving}>Anulează</button>
+                <button className="primary-action" type="submit" disabled={isSaving}>
+                  {isSaving ? 'Se salvează...' : editingDepartment ? 'Salvează modificările' : 'Adaugă departamentul'}
+                </button>
               </div>
             </form>
           </section>
@@ -267,14 +360,17 @@ export default function DepartmentsDirectory({ query }: DepartmentsDirectoryProp
 
       {departmentToDelete && (
         <div className="patient-modal-backdrop" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setDepartmentToDelete(null)
+          if (event.target === event.currentTarget && !isDeleting) setDepartmentToDelete(null)
         }}>
           <section className="patient-modal patient-delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="department-delete-title">
             <h2 id="department-delete-title">Ștergi departamentul?</h2>
-            <p><strong>{departmentToDelete.name}</strong> va fi eliminat din catalogul demonstrativ.</p>
+            <p><strong>{departmentToDelete.name}</strong> va fi eliminat din catalogul salvat.</p>
+            {requestError && <p className="patient-form-error" role="alert">{requestError}</p>}
             <div className="patient-modal-actions">
-              <button className="secondary-action" type="button" onClick={() => setDepartmentToDelete(null)}>Păstrează</button>
-              <button className="patient-confirm-delete" type="button" onClick={handleDelete}>Șterge departamentul</button>
+              <button className="secondary-action" type="button" onClick={() => setDepartmentToDelete(null)} disabled={isDeleting}>Păstrează</button>
+              <button className="patient-confirm-delete" type="button" onClick={() => void handleDelete()} disabled={isDeleting}>
+                {isDeleting ? 'Se șterge...' : 'Șterge departamentul'}
+              </button>
             </div>
           </section>
         </div>

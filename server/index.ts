@@ -7,6 +7,7 @@ import session from 'express-session'
 import helmet from 'helmet'
 import mongoose from 'mongoose'
 import { Appointment, type AppointmentStatus, type AppointmentType } from './models/Appointment.js'
+import { Department, type DepartmentAccount, type DepartmentStatus } from './models/Department.js'
 import { Doctor, type DoctorAccount, type DoctorStatus } from './models/Doctor.js'
 import { Patient, type PatientAccount, type PatientStatus } from './models/Patient.js'
 import { User } from './models/User.js'
@@ -133,6 +134,7 @@ function regenerateSession(request: express.Request) {
 
 const authRouter = express.Router()
 const appointmentsRouter = express.Router()
+const departmentsRouter = express.Router()
 const doctorsRouter = express.Router()
 const patientsRouter = express.Router()
 
@@ -144,6 +146,10 @@ type AppointmentInput = {
   type: AppointmentType
   status: AppointmentStatus
 }
+type DepartmentInput = Pick<
+  DepartmentAccount,
+  'name' | 'description' | 'location' | 'schedule' | 'doctorCount' | 'appointmentCount' | 'status' | 'doctors'
+>
 type DoctorInput = Pick<DoctorAccount, 'name' | 'specialty' | 'department' | 'experience' | 'schedule' | 'status'>
 type PatientInput = Pick<PatientAccount, 'name' | 'age' | 'phone' | 'email' | 'lastVisit' | 'status'>
 
@@ -153,6 +159,85 @@ function isAppointmentStatus(value: unknown): value is AppointmentStatus {
 
 function isAppointmentType(value: unknown): value is AppointmentType {
   return value === 'Consultație' || value === 'Control' || value === 'Investigație'
+}
+
+function isDepartmentStatus(value: unknown): value is DepartmentStatus {
+  return value === 'Activ' || value === 'Program limitat' || value === 'În amenajare'
+}
+
+function parseDepartmentInput(value: unknown): DepartmentInput | null {
+  if (!isRecord(value)) return null
+
+  const { name, description, location, schedule, doctorCount, appointmentCount, status, doctors } = value
+  if (
+    typeof name !== 'string'
+    || typeof description !== 'string'
+    || typeof location !== 'string'
+    || typeof schedule !== 'string'
+    || typeof doctorCount !== 'number'
+    || !Number.isInteger(doctorCount)
+    || typeof appointmentCount !== 'number'
+    || !Number.isInteger(appointmentCount)
+    || !isDepartmentStatus(status)
+    || !Array.isArray(doctors)
+    || !doctors.every((doctor) => typeof doctor === 'string')
+  ) {
+    return null
+  }
+
+  const normalizedName = name.trim()
+  const normalizedDescription = description.trim()
+  const normalizedLocation = location.trim()
+  const normalizedSchedule = schedule.trim()
+  const normalizedDoctors = doctors.map((doctor) => doctor.trim()).filter(Boolean)
+
+  if (
+    normalizedName.length < 2 || normalizedName.length > 80
+    || normalizedDescription.length < 2 || normalizedDescription.length > 240
+    || normalizedLocation.length < 2 || normalizedLocation.length > 120
+    || normalizedSchedule.length < 2 || normalizedSchedule.length > 80
+    || doctorCount < 0 || doctorCount > 500
+    || appointmentCount < 0 || appointmentCount > 10000
+    || normalizedDoctors.length > 100
+    || normalizedDoctors.some((doctor) => doctor.length > 100)
+  ) {
+    return null
+  }
+
+  return {
+    name: normalizedName,
+    description: normalizedDescription,
+    location: normalizedLocation,
+    schedule: normalizedSchedule,
+    doctorCount,
+    appointmentCount,
+    status,
+    doctors: normalizedDoctors,
+  }
+}
+
+function publicDepartment(department: {
+  _id: { toString: () => string }
+  name: string
+  description: string
+  location: string
+  schedule: string
+  doctorCount: number
+  appointmentCount: number
+  status: DepartmentStatus
+  doctors: string[]
+}) {
+  return {
+    id: department._id.toString(),
+    name: department.name,
+    description: department.description,
+    location: department.location,
+    schedule: department.schedule,
+    doctorCount: department.doctorCount,
+    appointmentCount: department.appointmentCount,
+    status: department.status,
+    doctors: department.doctors,
+  }
 }
 
 function parseAppointmentInput(value: unknown): AppointmentInput | null {
@@ -374,6 +459,101 @@ function getRequestUserId(request: express.Request, response: express.Response):
   response.status(401).json({ message: 'Autentifică-te pentru a gestiona medicii.' })
   return null
 }
+
+departmentsRouter.get('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const departments = await Department.find({ owner: ownerId }).sort({ name: 1 })
+  response.json({ departments: departments.map(publicDepartment) })
+})
+
+departmentsRouter.post('/', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const departmentInput = parseDepartmentInput(request.body)
+  if (!departmentInput) {
+    response.status(400).json({ message: 'Verifică numele, descrierea, locația, programul, numărul de medici și programări, statusul și echipa.' })
+    return
+  }
+
+  try {
+    const department = await Department.create({
+      ...departmentInput,
+      owner: ownerId,
+      normalizedName: departmentInput.name.normalize('NFKC').toLocaleLowerCase('ro'),
+    })
+    response.status(201).json({ department: publicDepartment(department) })
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      response.status(409).json({ message: 'Există deja un departament cu acest nume în lista ta.' })
+      return
+    }
+
+    throw error
+  }
+})
+
+departmentsRouter.put('/:departmentId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const departmentId = request.params.departmentId
+  if (!mongoose.isValidObjectId(departmentId)) {
+    response.status(400).json({ message: 'Identificatorul departamentului nu este valid.' })
+    return
+  }
+
+  const departmentInput = parseDepartmentInput(request.body)
+  if (!departmentInput) {
+    response.status(400).json({ message: 'Verifică numele, descrierea, locația, programul, numărul de medici și programări, statusul și echipa.' })
+    return
+  }
+
+  try {
+    const department = await Department.findOneAndUpdate(
+      { _id: departmentId, owner: ownerId },
+      {
+        ...departmentInput,
+        normalizedName: departmentInput.name.normalize('NFKC').toLocaleLowerCase('ro'),
+      },
+      { new: true, runValidators: true },
+    )
+    if (!department) {
+      response.status(404).json({ message: 'Departamentul nu a fost găsit în lista ta.' })
+      return
+    }
+
+    response.json({ department: publicDepartment(department) })
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      response.status(409).json({ message: 'Există deja un departament cu acest nume în lista ta.' })
+      return
+    }
+
+    throw error
+  }
+})
+
+departmentsRouter.delete('/:departmentId', async (request, response) => {
+  const ownerId = getRequestUserId(request, response)
+  if (!ownerId) return
+
+  const departmentId = request.params.departmentId
+  if (!mongoose.isValidObjectId(departmentId)) {
+    response.status(400).json({ message: 'Identificatorul departamentului nu este valid.' })
+    return
+  }
+
+  const department = await Department.findOneAndDelete({ _id: departmentId, owner: ownerId })
+  if (!department) {
+    response.status(404).json({ message: 'Departamentul nu a fost găsit în lista ta.' })
+    return
+  }
+
+  response.status(204).end()
+})
 
 appointmentsRouter.get('/', async (request, response) => {
   const ownerId = getRequestUserId(request, response)
@@ -810,6 +990,16 @@ app.use('/api/appointments', (_request, response, next) => {
   next()
 })
 app.use('/api/appointments', appointmentsRouter)
+
+app.use('/api/departments', (_request, response, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    response.status(503).json({ message: 'Baza de date nu este conectată. Verifică MongoDB Atlas și încearcă din nou.' })
+    return
+  }
+
+  next()
+})
+app.use('/api/departments', departmentsRouter)
 
 const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
   console.error('Eroare neașteptată în API.', error)
