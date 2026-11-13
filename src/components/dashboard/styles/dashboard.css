@@ -6156,3 +6156,452 @@
 .dashboard-page[data-theme="dark"] .emergency-table tbody tr:hover td {
   color: #e0ebe3;
 }
+
+.administration-directory {
+  display: grid;
+  gap: 15px;
+  margin-top: 21px;
+}
+
+.administration-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.administration-toolbar p {
+  margin: 0;
+  color: #78877e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.administration-toolbar button {
+  flex: 0 0 auto;
+}
+
+.administration-system-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+}
+
+.administration-system-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #dcece2;
+  border-radius: 11px;
+  color: #37815c;
+  background: #f0f8f2;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.administration-system-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.administration-system-copy > span {
+  color: #84948a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+}
+
+.administration-system-copy strong {
+  overflow: hidden;
+  color: #365545;
+  font-size: 15px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+}
+
+.administration-system-copy small {
+  color: #87958d;
+  font-size: 12px;
+}
+
+.administration-status {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid #e6ece8;
+  border-radius: 999px;
+  color: #728078;
+  background: #f7f9f7;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.administration-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9aa79f;
+}
+
+.administration-status.is-online {
+  border-color: #d7eadd;
+  color: #3e7854;
+  background: #f0f8f2;
+}
+
+.administration-status.is-online i {
+  background: #55a875;
+  box-shadow: 0 0 0 3px rgba(85, 168, 117, .12);
+}
+
+.administration-status.is-offline {
+  border-color: #efd8d5;
+  color: #a3524b;
+  background: #fff7f6;
+}
+
+.administration-status.is-offline i {
+  background: #c7655d;
+}
+
+.administration-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.administration-summary-card {
+  display: grid;
+  gap: 5px;
+  padding: 13px 15px;
+}
+
+.administration-summary-card > span {
+  color: #7d8b82;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.administration-summary-card strong {
+  color: #2f4d3b;
+  font-size: 21px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.administration-summary-card small {
+  color: #97a39b;
+  font-size: 11px;
+}
+
+.administration-panel {
+  display: grid;
+  gap: 14px;
+  padding: 17px;
+}
+
+.administration-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.administration-panel-heading h2 {
+  margin: 0;
+  color: #304b3b;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.administration-panel-heading p {
+  max-width: 760px;
+  margin: 5px 0 0;
+  color: #829087;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.administration-event-count {
+  flex: 0 0 auto;
+  color: #819087;
+  font-size: 12px;
+}
+
+.administration-issues {
+  display: grid;
+  gap: 8px;
+}
+
+.administration-issue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 11px;
+  border: 1px solid #e5ece7;
+  border-radius: 8px;
+  background: #fafcfb;
+}
+
+.administration-issue-icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #567461;
+  background: #edf4ef;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.administration-issue > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.administration-issue strong {
+  color: #4a6052;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.administration-issue p {
+  margin: 3px 0 0;
+  color: #89968e;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.administration-issue-count {
+  flex: 0 0 auto;
+  color: #849188;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.administration-issue.is-critical {
+  border-color: #eed9d6;
+  background: #fff9f8;
+}
+
+.administration-issue.is-critical .administration-issue-icon {
+  color: #a44f48;
+  background: #f9e9e7;
+}
+
+.administration-issue.is-warning {
+  border-color: #eee5cf;
+  background: #fffcf5;
+}
+
+.administration-issue.is-warning .administration-issue-icon {
+  color: #91763d;
+  background: #f5efd9;
+}
+
+.administration-issue.is-ok {
+  border-color: #dcece2;
+  background: #f6faf7;
+}
+
+.administration-issue.is-ok .administration-issue-icon {
+  color: #3f7956;
+  background: #e5f2e8;
+}
+
+.administration-activity-list {
+  display: grid;
+}
+
+.administration-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 57px;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.administration-activity-row:last-child {
+  border-bottom: 0;
+}
+
+.administration-activity-mark {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #dcece2;
+  border-radius: 8px;
+  color: #427957;
+  background: #f1f8f3;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.administration-activity-mark.is-delete {
+  border-color: #eed9d6;
+  color: #a3524b;
+  background: #fff7f6;
+}
+
+.administration-activity-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.administration-activity-copy strong {
+  color: #4a6052;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.administration-activity-copy small {
+  color: #919d95;
+  font-size: 11px;
+}
+
+.administration-activity-row time {
+  flex: 0 0 auto;
+  color: #87948c;
+  font-size: 12px;
+  text-align: right;
+}
+
+.administration-footnote {
+  padding-top: 10px;
+  margin: 0;
+  border-top: 1px solid #edf1ee;
+  color: #8a978f;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.administration-empty {
+  padding: 12px 0;
+  margin: 0;
+  color: #89968e;
+  font-size: 13px;
+  text-align: center;
+}
+
+.administration-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #eed9d6;
+  border-radius: 8px;
+  color: #a3524b;
+  background: #fff7f6;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.administration-error button {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid #e6c9c6;
+  border-radius: 6px;
+  color: #a3524b;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.dashboard-page[data-theme="dark"] :is(.administration-issue, .administration-error) {
+  border-color: #34463a;
+  background: #202f25;
+}
+
+.dashboard-page[data-theme="dark"] .administration-issue.is-critical,
+.dashboard-page[data-theme="dark"] .administration-error {
+  border-color: #714441;
+  color: #f0b5ad;
+  background: #352320;
+}
+
+.dashboard-page[data-theme="dark"] .administration-issue.is-warning {
+  border-color: #645736;
+  background: #302c20;
+}
+
+.dashboard-page[data-theme="dark"] .administration-issue.is-ok,
+.dashboard-page[data-theme="dark"] .administration-status.is-online {
+  border-color: #355d45;
+  background: #1c3023;
+}
+
+.dashboard-page[data-theme="dark"] .administration-status.is-offline {
+  border-color: #714441;
+  color: #f0b5ad;
+  background: #352320;
+}
+
+.dashboard-page[data-theme="dark"] .administration-activity-row,
+.dashboard-page[data-theme="dark"] .administration-footnote {
+  border-color: #34463a;
+}
+
+@media (max-width: 850px) {
+  .administration-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 580px) {
+  .administration-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .administration-toolbar button {
+    width: 100%;
+  }
+
+  .administration-system-card {
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .administration-status {
+    margin-left: 53px;
+  }
+
+  .administration-panel {
+    padding: 13px;
+  }
+
+  .administration-issue {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .administration-issue-count {
+    margin-left: 35px;
+  }
+
+  .administration-activity-row {
+    align-items: flex-start;
+    padding: 10px 0;
+  }
+
+  .administration-activity-row time {
+    max-width: 100px;
+    font-size: 9px;
+  }
+}

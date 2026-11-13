@@ -1,6 +1,7 @@
 import AnalyticsReports from './features/analytics/AnalyticsReports'
 import AppointmentsDirectory from './features/appointments/AppointmentsDirectory'
 import BillingInsurance from './features/billing/BillingInsurance'
+import AdministrationDirectory from './features/administration/AdministrationDirectory'
 import DepartmentsDirectory from './features/departments/DepartmentsDirectory'
 import DoctorsDirectory from './features/doctors/DoctorsDirectory'
 import EmergencyDirectory from './features/emergency/EmergencyDirectory'
@@ -40,6 +41,7 @@ export default function DashboardContent({
   if (activeItem === 'Urgențe și internări') return <EmergencyDirectory query={query} />
   if (activeItem === 'Analize și rapoarte') return <AnalyticsReports query={query} />
   if (activeItem === 'Facturare și asigurări') return <BillingInsurance query={query} />
+  if (activeItem === 'Administrare') return <AdministrationDirectory query={query} />
   if (activeItem === 'Setări') {
     return (
       <SettingsDirectory

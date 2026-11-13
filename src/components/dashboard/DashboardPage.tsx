@@ -79,7 +79,7 @@ export default function DashboardPage({ user, onUserUpdated, onLogout }: Dashboa
 
   function handleSelectItem(item: string) {
     setActiveItem(item)
-    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente' && item !== 'Farmacie' && item !== 'Urgențe și internări' && item !== 'Analize și rapoarte' && item !== 'Facturare și asigurări' && item !== 'Setări') {
+    if (item !== 'Tablou de bord' && item !== 'Medici' && item !== 'Pacienți' && item !== 'Programări' && item !== 'Departamente' && item !== 'Farmacie' && item !== 'Urgențe și internări' && item !== 'Analize și rapoarte' && item !== 'Facturare și asigurări' && item !== 'Setări' && item !== 'Administrare') {
       setNotice(`Secțiunea „${item}” va fi disponibilă după autentificare.`)
     } else {
       setNotice('')
@@ -171,6 +171,8 @@ export default function DashboardPage({ user, onUserUpdated, onLogout }: Dashboa
                           ? 'Caută medic sau departament în rapoarte...'
                           : activeItem === 'Facturare și asigurări'
                             ? 'Caută factură, pacient sau dosar...'
+                              : activeItem === 'Administrare'
+                                ? 'Caută în jurnalul de activitate...'
                             : activeItem === 'Setări'
                               ? 'Caută o categorie de setări...'
                     : 'Caută pacienți sau programări...'
@@ -240,6 +242,8 @@ export default function DashboardPage({ user, onUserUpdated, onLogout }: Dashboa
                           ? 'Urmărește indicatorii clinici și explorează activitatea agregată.'
                           : activeItem === 'Facturare și asigurări'
                             ? 'Urmărește facturile și solicitările demonstrative de decontare.'
+                            : activeItem === 'Administrare'
+                              ? 'Monitorizează integritatea datelor și activitatea din cont.'
                             : activeItem === 'Setări'
                               ? 'Configurează profilul clinicii, programul și preferințele contului.'
                     : 'O privire de ansamblu asupra activității clinicii tale.'}

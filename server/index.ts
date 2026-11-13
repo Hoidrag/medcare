@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit'
 import session from 'express-session'
 import helmet from 'helmet'
 import mongoose from 'mongoose'
+import { ActivityLog, type ActivityAction, type ActivityEntity } from './models/ActivityLog.js'
 import { Appointment, type AppointmentStatus, type AppointmentType } from './models/Appointment.js'
 import { Department, type DepartmentAccount, type DepartmentStatus } from './models/Department.js'
 import { Doctor, type DoctorAccount, type DoctorStatus } from './models/Doctor.js'
@@ -299,11 +300,39 @@ function getAuthenticatedUserId(request: express.Request, response: express.Resp
   const userId = request.session.userId
   if (userId) return userId
 
-  response.status(401).json({ message: 'Autentifică-te pentru a modifica setările contului.' })
+  response.status(401).json({ message: 'Autentifică-te pentru a accesa această secțiune.' })
   return null
 }
 
+class ActivityLogWriteError extends Error {
+  constructor() {
+    super('Modificarea a fost salvată, dar jurnalul de activitate nu a putut fi actualizat. Reîncarcă lista înainte de a repeta acțiunea.')
+    this.name = 'ActivityLogWriteError'
+  }
+}
+
+async function recordActivity(
+  userId: string,
+  action: ActivityAction,
+  entity: ActivityEntity,
+  entityId: string,
+) {
+  try {
+    await ActivityLog.create({
+      owner: userId,
+      actor: userId,
+      action,
+      entity,
+      entityId,
+    })
+  } catch (error) {
+    console.error('Nu s-a putut salva evenimentul în jurnalul de activitate.', formatMongoError(error))
+    throw new ActivityLogWriteError()
+  }
+}
+
 const authRouter = express.Router()
+const adminRouter = express.Router()
 const appointmentsRouter = express.Router()
 const departmentsRouter = express.Router()
 const doctorsRouter = express.Router()
@@ -655,6 +684,7 @@ departmentsRouter.post('/', async (request, response) => {
       owner: ownerId,
       normalizedName: departmentInput.name.normalize('NFKC').toLocaleLowerCase('ro'),
     })
+    await recordActivity(ownerId, 'create', 'department', department.id)
     response.status(201).json({ department: publicDepartment(department) })
   } catch (error) {
     if (isDuplicateKeyError(error)) {
@@ -696,6 +726,7 @@ departmentsRouter.put('/:departmentId', async (request, response) => {
       return
     }
 
+    await recordActivity(ownerId, 'update', 'department', department.id)
     response.json({ department: publicDepartment(department) })
   } catch (error) {
     if (isDuplicateKeyError(error)) {
@@ -723,6 +754,7 @@ departmentsRouter.delete('/:departmentId', async (request, response) => {
     return
   }
 
+  await recordActivity(ownerId, 'delete', 'department', department.id)
   response.status(204).end()
 })
 
@@ -763,6 +795,7 @@ appointmentsRouter.post('/', async (request, response) => {
     doctorName: doctor.name,
     specialty: doctor.specialty,
   })
+  await recordActivity(ownerId, 'create', 'appointment', appointment.id)
   response.status(201).json({ appointment: publicAppointment(appointment) })
 })
 
@@ -812,6 +845,7 @@ appointmentsRouter.put('/:appointmentId', async (request, response) => {
     return
   }
 
+  await recordActivity(ownerId, 'update', 'appointment', appointment.id)
   response.json({ appointment: publicAppointment(appointment) })
 })
 
@@ -831,6 +865,7 @@ appointmentsRouter.delete('/:appointmentId', async (request, response) => {
     return
   }
 
+  await recordActivity(ownerId, 'delete', 'appointment', appointment.id)
   response.status(204).end()
 })
 
@@ -853,6 +888,7 @@ patientsRouter.post('/', async (request, response) => {
   }
 
   const patient = await Patient.create({ ...patientInput, owner: ownerId })
+  await recordActivity(ownerId, 'create', 'patient', patient.id)
   response.status(201).json({ patient: publicPatient(patient) })
 })
 
@@ -882,6 +918,7 @@ patientsRouter.put('/:patientId', async (request, response) => {
     return
   }
 
+  await recordActivity(ownerId, 'update', 'patient', patient.id)
   response.json({ patient: publicPatient(patient) })
 })
 
@@ -901,6 +938,7 @@ patientsRouter.delete('/:patientId', async (request, response) => {
     return
   }
 
+  await recordActivity(ownerId, 'delete', 'patient', patient.id)
   response.status(204).end()
 })
 
@@ -928,6 +966,7 @@ doctorsRouter.post('/', async (request, response) => {
       owner: ownerId,
       normalizedName: doctorInput.name.normalize('NFKC').toLocaleLowerCase('ro'),
     })
+    await recordActivity(ownerId, 'create', 'doctor', doctor.id)
     response.status(201).json({ doctor: publicDoctor(doctor) })
   } catch (error) {
     if (isDuplicateKeyError(error)) {
@@ -969,6 +1008,7 @@ doctorsRouter.put('/:doctorId', async (request, response) => {
       return
     }
 
+    await recordActivity(ownerId, 'update', 'doctor', doctor.id)
     response.json({ doctor: publicDoctor(doctor) })
   } catch (error) {
     if (isDuplicateKeyError(error)) {
@@ -996,7 +1036,158 @@ doctorsRouter.delete('/:doctorId', async (request, response) => {
     return
   }
 
+  await recordActivity(ownerId, 'delete', 'doctor', doctor.id)
   response.status(204).end()
+})
+
+adminRouter.get('/activity', async (request, response) => {
+  const ownerId = getAuthenticatedUserId(request, response)
+  if (!ownerId) return
+
+  const events = await ActivityLog.find({ owner: ownerId })
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean()
+  response.json({
+    events: events.map((event) => ({
+      id: event._id.toString(),
+      action: event.action,
+      entity: event.entity,
+      entityId: event.entityId,
+      createdAt: event.createdAt.toISOString(),
+    })),
+  })
+})
+
+adminRouter.get('/integrity', async (request, response) => {
+  const ownerId = getAuthenticatedUserId(request, response)
+  if (!ownerId) return
+
+  const ownerObjectId = new mongoose.Types.ObjectId(ownerId)
+  const [
+    patientCount,
+    doctorCount,
+    appointmentCount,
+    departmentCount,
+    patientsMissingContact,
+    appointmentsWithMissingReferences,
+  ] = await Promise.all([
+    Patient.countDocuments({ owner: ownerObjectId }),
+    Doctor.countDocuments({ owner: ownerObjectId }),
+    Appointment.countDocuments({ owner: ownerObjectId }),
+    Department.countDocuments({ owner: ownerObjectId }),
+    Patient.countDocuments({
+      owner: ownerObjectId,
+      $or: [
+        { phone: { $exists: false } },
+        { phone: '' },
+        { email: { $exists: false } },
+        { email: '' },
+      ],
+    }),
+    Appointment.aggregate([
+      { $match: { owner: ownerObjectId } },
+      {
+        $lookup: {
+          from: Patient.collection.name,
+          let: { linkedId: '$patientId', recordOwner: '$owner' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$linkedId'] },
+                    { $eq: ['$owner', '$$recordOwner'] },
+                  ],
+                },
+              },
+            },
+            { $project: { _id: 1 } },
+          ],
+          as: 'patientRecord',
+        },
+      },
+      {
+        $lookup: {
+          from: Doctor.collection.name,
+          let: { linkedId: '$doctorId', recordOwner: '$owner' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$linkedId'] },
+                    { $eq: ['$owner', '$$recordOwner'] },
+                  ],
+                },
+              },
+            },
+            { $project: { _id: 1 } },
+          ],
+          as: 'doctorRecord',
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $or: [
+              { $eq: [{ $size: '$patientRecord' }, 0] },
+              { $eq: [{ $size: '$doctorRecord' }, 0] },
+            ],
+          },
+        },
+      },
+      { $count: 'count' },
+    ]),
+  ])
+
+  const brokenAppointmentCount = appointmentsWithMissingReferences[0]?.count ?? 0
+  const issues: Array<{
+    id: string
+    severity: 'critical' | 'warning' | 'ok'
+    title: string
+    description: string
+    count: number
+  }> = []
+
+  if (brokenAppointmentCount > 0) {
+    issues.push({
+      id: 'appointment-references',
+      severity: 'critical',
+      title: 'Programări cu referințe lipsă',
+      description: 'Unele programări nu mai au pacientul sau medicul asociat în acest cont.',
+      count: brokenAppointmentCount,
+    })
+  }
+  if (patientsMissingContact > 0) {
+    issues.push({
+      id: 'patient-contact',
+      severity: 'warning',
+      title: 'Date de contact incomplete',
+      description: 'Unii pacienți nu au completat cel puțin un câmp de contact.',
+      count: patientsMissingContact,
+    })
+  }
+  if (issues.length === 0) {
+    issues.push({
+      id: 'integrity-ok',
+      severity: 'ok',
+      title: 'Nu au fost găsite probleme',
+      description: 'Referințele programărilor și câmpurile de contact au fost verificate.',
+      count: 0,
+    })
+  }
+
+  response.json({
+    checkedAt: new Date().toISOString(),
+    totals: {
+      patients: patientCount,
+      doctors: doctorCount,
+      appointments: appointmentCount,
+      departments: departmentCount,
+    },
+    issues,
+  })
 })
 
 authRouter.post('/register', authRateLimit, async (request, response) => {
@@ -1269,6 +1460,16 @@ authRouter.post('/logout', (request, response, next) => {
 
 app.use('/api/auth', authRouter)
 
+app.use('/api/admin', (_request, response, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    response.status(503).json({ message: 'Baza de date nu este conectată. Verifică MongoDB Atlas și încearcă din nou.' })
+    return
+  }
+
+  next()
+})
+app.use('/api/admin', adminRouter)
+
 app.use('/api/doctors', (_request, response, next) => {
   if (mongoose.connection.readyState !== 1) {
     response.status(503).json({ message: 'Baza de date nu este conectată. Verifică MongoDB Atlas și încearcă din nou.' })
@@ -1310,6 +1511,11 @@ app.use('/api/departments', (_request, response, next) => {
 app.use('/api/departments', departmentsRouter)
 
 const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
+  if (error instanceof ActivityLogWriteError) {
+    response.status(503).json({ message: error.message })
+    return
+  }
+
   console.error('Eroare neașteptată în API.', error)
 
   if (response.headersSent) {
