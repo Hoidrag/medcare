@@ -6102,3 +6102,57 @@
     font-size: 10px;
   }
 }
+
+.dashboard-page[data-theme="dark"] .sidebar-link:hover:not(.active),
+.dashboard-page[data-theme="dark"] .sidebar-signout:hover,
+.dashboard-page[data-theme="dark"] .settings-navigation-item:hover:not(.is-active),
+.dashboard-page[data-theme="dark"] .doctor-row-actions button:hover:not(.doctor-delete-action),
+.dashboard-page[data-theme="dark"] .patient-row-actions button:hover:not(.patient-delete-action),
+.dashboard-page[data-theme="dark"] .appointment-row-actions button:hover:not(.appointment-delete-action),
+.dashboard-page[data-theme="dark"] .billing-row-actions button:hover:not(.billing-delete-action),
+.dashboard-page[data-theme="dark"] .pharmacy-row-actions button:hover,
+.dashboard-page[data-theme="dark"] .emergency-edit-button:hover,
+.dashboard-page[data-theme="dark"] .admission-row-actions button:hover,
+.dashboard-page[data-theme="dark"] .department-card-actions > button:hover,
+.dashboard-page[data-theme="dark"] .department-card-actions > span > button:hover,
+.dashboard-page[data-theme="dark"] .appointment-calendar-today:hover,
+.dashboard-page[data-theme="dark"] .appointment-calendar-arrow:hover,
+.dashboard-page[data-theme="dark"] .appointment-calendar-day:hover {
+  border-color: #3a5142;
+  color: #e0ebe3;
+  background-color: #24372b;
+}
+
+.dashboard-page[data-theme="dark"] .secondary-action:hover,
+.dashboard-page[data-theme="dark"] .analytics-export-button:hover {
+  border-color: #3a5142;
+  color: #e0ebe3;
+  background-color: #24372b;
+}
+
+.dashboard-page[data-theme="dark"] .dashboard-logout:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .doctor-row-actions .doctor-delete-action:hover,
+.dashboard-page[data-theme="dark"] .patient-row-actions .patient-delete-action:hover,
+.dashboard-page[data-theme="dark"] .appointment-row-actions .appointment-delete-action:hover,
+.dashboard-page[data-theme="dark"] .billing-row-actions .billing-delete-action:hover {
+  border-color: #714441;
+  color: #f0b5ad;
+  background-color: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-table tbody tr:hover,
+.dashboard-page[data-theme="dark"] .patients-table tbody tr:hover,
+.dashboard-page[data-theme="dark"] .billing-table tbody tr:hover,
+.dashboard-page[data-theme="dark"] .pharmacy-table tbody tr:hover,
+.dashboard-page[data-theme="dark"] .emergency-table tbody tr:hover {
+  color: #e0ebe3;
+  background-color: #243329;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-table tbody tr:hover td,
+.dashboard-page[data-theme="dark"] .patients-table tbody tr:hover td,
+.dashboard-page[data-theme="dark"] .billing-table tbody tr:hover td,
+.dashboard-page[data-theme="dark"] .pharmacy-table tbody tr:hover td,
+.dashboard-page[data-theme="dark"] .emergency-table tbody tr:hover td {
+  color: #e0ebe3;
+}
