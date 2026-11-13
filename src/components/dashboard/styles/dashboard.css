@@ -4489,6 +4489,43 @@
   margin-top: 3px;
 }
 
+.dashboard-page .appointments-card .widget-title h2 {
+  font-size: 15px;
+}
+
+.dashboard-page .appointments-card .widget-title p {
+  font-size: 12px;
+}
+
+.dashboard-page .appointments-card .appointments-heading .secondary-action {
+  font-size: 11px;
+}
+
+.dashboard-page .appointments-card .date-month,
+.dashboard-page .appointments-card .date-chip,
+.dashboard-page .appointments-card th,
+.dashboard-page .appointments-card .appointment-status {
+  font-size: 10px;
+}
+
+.dashboard-page .appointments-card td {
+  font-size: 12px;
+}
+
+.dashboard-page .appointments-card .patient-cell strong,
+.dashboard-page .appointments-card .doctor-cell {
+  font-size: 12px;
+}
+
+.dashboard-page .appointments-card .patient-cell small,
+.dashboard-page .appointments-card .table-subtext {
+  font-size: 10px;
+}
+
+.dashboard-page .appointments-card .patient-avatar {
+  font-size: 9px;
+}
+
 .departments-directory .department-summary-card {
   min-height: 66px;
   gap: 9px;
@@ -5891,6 +5928,85 @@
   color: #fff;
 }
 
+.dashboard-page[data-theme="dark"] .featured-specialist {
+  background: linear-gradient(160deg, #24382d, #1b2b21);
+}
+
+.dashboard-page[data-theme="dark"] .doctor-halo {
+  background: #2f4a39;
+}
+
+.dashboard-page[data-theme="dark"] .specialty-tag {
+  color: #b6dfc2;
+  background: rgba(34, 59, 44, .94);
+}
+
+.dashboard-page[data-theme="dark"] .featured-caption {
+  background: linear-gradient(0deg, rgba(17, 27, 22, .97), rgba(17, 27, 22, .82));
+}
+
+.dashboard-page[data-theme="dark"] .featured-caption strong {
+  color: #e0ebe3;
+}
+
+.dashboard-page[data-theme="dark"] .featured-caption span,
+.dashboard-page[data-theme="dark"] .featured-caption small {
+  color: #b1c0b5;
+}
+
+.dashboard-page[data-theme="dark"] .specialists-card .availability {
+  color: #b6dfc2;
+  background: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .specialists-card .availability-blue {
+  color: #b4d7e3;
+  background: #1d3038;
+}
+
+.dashboard-page[data-theme="dark"] .specialists-card .availability-amber {
+  color: #e0c58e;
+  background: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .specialists-card .availability-rose {
+  color: #f0b5ad;
+  background: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .appointment-status {
+  color: #e0c58e;
+  background: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .appointment-status.status-confirmed {
+  color: #b6dfc2;
+  background: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .appointment-status.status-cancelled {
+  color: #f0b5ad;
+  background: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .appointment-date-strip {
+  border-color: #34463a;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .date-month {
+  color: #a4b3a9;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .date-chip {
+  color: #bdcbbf;
+  background: #243329;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-card .date-chip.selected {
+  color: #fff;
+  background: #397e5f;
+}
+
 .dashboard-page[data-theme="dark"] .dashboard-sidebar,
 .dashboard-page[data-theme="dark"] .dashboard-topbar {
   border-color: #2b3c31;
@@ -5914,6 +6030,12 @@
 .dashboard-page[data-theme="dark"] .sidebar-search input,
 .dashboard-page[data-theme="dark"] .dashboard-search input {
   color: #e0ebe3;
+}
+
+.dashboard-page[data-theme="dark"] .dashboard-search kbd {
+  border-color: #3a4d40;
+  color: #a4b3a9;
+  background-color: #142019;
 }
 
 .dashboard-page[data-theme="dark"] :is(
@@ -6223,6 +6345,210 @@
   border-color: #714441;
   color: #f0b5ad;
   background-color: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .doctor-status {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .doctor-status-blue {
+  color: #b4d7e3;
+  background-color: #1d3038;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .doctor-status-amber {
+  color: #e0c58e;
+  background-color: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .doctor-status-rose {
+  color: #f0b5ad;
+  background-color: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .doctor-appointment-count {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-table th {
+  color: #a4b3a9;
+  background-color: #243329;
+}
+
+.dashboard-page[data-theme="dark"] .patients-table th {
+  color: #a4b3a9;
+  background-color: #243329;
+}
+
+.dashboard-page[data-theme="dark"] .patients-directory .patient-status {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .patients-directory .patient-status-monitoring {
+  color: #e0c58e;
+  background-color: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .patients-directory .patient-status-discharged {
+  color: #bdcbbf;
+  background-color: #28342d;
+}
+
+.dashboard-page[data-theme="dark"] .patients-directory .patient-modal-actions .secondary-action {
+  border-color: #34473a;
+  color: #d8e5dc;
+  background-color: #1d2a22;
+}
+
+.dashboard-page[data-theme="dark"] .patients-directory .patient-modal-actions .secondary-action:hover:not(:disabled) {
+  border-color: #3a5142;
+  color: #e0ebe3;
+  background-color: #24372b;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-day-agenda {
+  background-color: #17231c;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-day-agenda-heading {
+  border-color: #34463a;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-day-agenda-heading > strong {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-agenda-card {
+  border-color: #34463a;
+  background-color: #1b2921;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-agenda-time {
+  color: #b6dfc2;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-agenda-details strong {
+  color: #e0ebe3;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-agenda-details span,
+.dashboard-page[data-theme="dark"] .appointments-directory .appointment-agenda-details small {
+  color: #a4b3a9;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .patient-modal-actions .secondary-action,
+.dashboard-page[data-theme="dark"] .departments-directory .patient-modal-actions .secondary-action,
+.dashboard-page[data-theme="dark"] .billing-page .patient-modal-actions .secondary-action,
+.dashboard-page[data-theme="dark"] .emergency-directory .patient-modal-actions .secondary-action,
+.dashboard-page[data-theme="dark"] .pharmacy-directory .patient-modal-actions .secondary-action,
+.dashboard-page[data-theme="dark"] .doctors-directory .patient-modal-actions .secondary-action {
+  border-color: #34473a;
+  color: #d8e5dc;
+  background-color: #1d2a22;
+}
+
+.dashboard-page[data-theme="dark"] .appointments-directory .patient-modal-actions .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .departments-directory .patient-modal-actions .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .billing-page .patient-modal-actions .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .emergency-directory .patient-modal-actions .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .pharmacy-directory .patient-modal-actions .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .doctors-directory .patient-modal-actions .secondary-action:hover:not(:disabled) {
+  border-color: #3a5142;
+  color: #e0ebe3;
+  background-color: #24372b;
+}
+
+.dashboard-page[data-theme="dark"] .departments-directory .department-doctors {
+  background-color: #243329;
+}
+
+.dashboard-page[data-theme="dark"] .departments-directory .department-doctors strong {
+  color: #d8e5dc;
+}
+
+.dashboard-page[data-theme="dark"] .departments-directory .department-doctors p {
+  color: #a4b3a9;
+}
+
+.dashboard-page[data-theme="dark"] .departments-directory .department-status {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .analytics-reports .analytics-period-badge {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .departments-directory .department-status-limited {
+  color: #e0c58e;
+  background-color: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .departments-directory .department-status-setup {
+  color: #b4d7e3;
+  background-color: #1d3038;
+}
+
+.dashboard-page[data-theme="dark"] .analytics-reports .analytics-filters {
+  border-color: #34463a;
+  background-color: #1b2921;
+}
+
+.dashboard-page[data-theme="dark"] .analytics-reports .analytics-filters label > span {
+  color: #a4b3a9;
+}
+
+.dashboard-page[data-theme="dark"] .analytics-reports .analytics-filters select {
+  border-color: #3a4d40;
+  color: #e0ebe3;
+  background-color: #142019;
+}
+
+.dashboard-page[data-theme="dark"] .billing-page .billing-table th {
+  color: #a4b3a9;
+  background-color: #243329;
+}
+
+.dashboard-page[data-theme="dark"] .pharmacy-directory .pharmacy-status {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .pharmacy-directory .pharmacy-status-low,
+.dashboard-page[data-theme="dark"] .pharmacy-directory .pharmacy-status-expiring {
+  color: #e0c58e;
+  background-color: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .pharmacy-directory .pharmacy-status-expired {
+  color: #f0b5ad;
+  background-color: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .pharmacy-directory .pharmacy-movement-count {
+  color: #b6dfc2;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .emergency-directory .emergency-priority-critical,
+.dashboard-page[data-theme="dark"] .emergency-directory .emergency-priority-high {
+  color: #f0b5ad;
+  background-color: #382725;
+}
+
+.dashboard-page[data-theme="dark"] .emergency-directory .emergency-priority-medium {
+  color: #e0c58e;
+  background-color: #362f21;
+}
+
+.dashboard-page[data-theme="dark"] .emergency-directory .emergency-priority-low {
+  color: #b6dfc2;
+  background-color: #223b2c;
 }
 
 .dashboard-page[data-theme="dark"] .doctors-table tbody tr:hover,
