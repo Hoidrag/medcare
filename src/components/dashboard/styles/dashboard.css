@@ -5887,6 +5887,10 @@
   background: #111b16;
 }
 
+.dashboard-page[data-theme="dark"] .overview-stats .stat-value {
+  color: #fff;
+}
+
 .dashboard-page[data-theme="dark"] .dashboard-sidebar,
 .dashboard-page[data-theme="dark"] .dashboard-topbar {
   border-color: #2b3c31;
@@ -5966,6 +5970,23 @@
   .settings-field select,
   .settings-time-field input
 ) {
+  border-color: #3a4d40;
+  color: #e0ebe3;
+  background-color: #142019;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .patient-modal {
+  border-color: #34463a;
+  background-color: #1b2921;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .patient-form-field {
+  color: #d8e5dc;
+}
+
+.dashboard-page[data-theme="dark"] .doctors-directory .doctor-specialty-filter select,
+.dashboard-page[data-theme="dark"] .doctors-directory .patient-form-field input,
+.dashboard-page[data-theme="dark"] .doctors-directory .patient-form-field select {
   border-color: #3a4d40;
   color: #e0ebe3;
   background-color: #142019;
@@ -6103,6 +6124,42 @@
   }
 }
 
+.dashboard-page[data-theme="dark"] .dashboard-overview-error button,
+.dashboard-page[data-theme="dark"] .doctors-load-error button,
+.dashboard-page[data-theme="dark"] .patients-load-error button,
+.dashboard-page[data-theme="dark"] .appointments-load-error button,
+.dashboard-page[data-theme="dark"] .departments-load-error button,
+.dashboard-page[data-theme="dark"] .doctor-row-actions button:not(.doctor-delete-action),
+.dashboard-page[data-theme="dark"] .patient-row-actions button:not(.patient-delete-action),
+.dashboard-page[data-theme="dark"] .appointment-row-actions button:not(.appointment-delete-action),
+.dashboard-page[data-theme="dark"] .billing-row-actions button:not(.billing-delete-action),
+.dashboard-page[data-theme="dark"] .pharmacy-row-actions button,
+.dashboard-page[data-theme="dark"] .emergency-edit-button,
+.dashboard-page[data-theme="dark"] .admission-row-actions button,
+.dashboard-page[data-theme="dark"] .appointment-calendar-today,
+.dashboard-page[data-theme="dark"] .appointment-calendar-arrow,
+.dashboard-page[data-theme="dark"] .appointment-calendar-day:not(.selected),
+.dashboard-page[data-theme="dark"] .appointment-agenda-empty button,
+.dashboard-page[data-theme="dark"] .analytics-export-button {
+  border-color: #3a5142;
+  color: #d8e5dc;
+  background-color: #1d2a22;
+}
+
+.dashboard-page[data-theme="dark"] .appointment-calendar-day.selected {
+  color: #e0ebe3;
+  background-color: #223b2c;
+}
+
+.dashboard-page[data-theme="dark"] .doctor-row-actions .doctor-delete-action,
+.dashboard-page[data-theme="dark"] .patient-row-actions .patient-delete-action,
+.dashboard-page[data-theme="dark"] .appointment-row-actions .appointment-delete-action,
+.dashboard-page[data-theme="dark"] .billing-row-actions .billing-delete-action {
+  border-color: #714441;
+  color: #f0b5ad;
+  background-color: #302220;
+}
+
 .dashboard-page[data-theme="dark"] .sidebar-link:hover:not(.active),
 .dashboard-page[data-theme="dark"] .sidebar-signout:hover,
 .dashboard-page[data-theme="dark"] .settings-navigation-item:hover:not(.is-active),
@@ -6123,11 +6180,39 @@
   background-color: #24372b;
 }
 
+.dashboard-page[data-theme="dark"] .dashboard-actions .secondary-action,
+.dashboard-page[data-theme="dark"] .dashboard-actions .primary-action {
+  border-color: #327c61;
+  color: #fff;
+  background-color: #327c61;
+}
+
 .dashboard-page[data-theme="dark"] .secondary-action:hover,
 .dashboard-page[data-theme="dark"] .analytics-export-button:hover {
   border-color: #3a5142;
   color: #e0ebe3;
   background-color: #24372b;
+}
+
+.dashboard-page[data-theme="dark"] .dashboard-actions .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .dashboard-actions .primary-action:hover:not(:disabled) {
+  border-color: #28694f;
+  color: #fff;
+  background-color: #28694f;
+}
+
+.dashboard-page[data-theme="dark"] .administration-toolbar .secondary-action,
+.dashboard-page[data-theme="dark"] .appointments-card .appointments-heading .secondary-action {
+  border-color: #327c61;
+  color: #fff;
+  background-color: #327c61;
+}
+
+.dashboard-page[data-theme="dark"] .administration-toolbar .secondary-action:hover:not(:disabled),
+.dashboard-page[data-theme="dark"] .appointments-card .appointments-heading .secondary-action:hover:not(:disabled) {
+  border-color: #28694f;
+  color: #fff;
+  background-color: #28694f;
 }
 
 .dashboard-page[data-theme="dark"] .dashboard-logout:hover:not(:disabled),
