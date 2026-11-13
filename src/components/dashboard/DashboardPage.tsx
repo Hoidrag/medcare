@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import type { AuthUser } from '../../services/auth'
+import { getAppointments } from '../../services/appointments'
+import { getDepartments } from '../../services/departments'
+import { getDoctors } from '../../services/doctors'
+import { getPatients } from '../../services/patients'
 import DashboardContent from './DashboardContent'
+import { downloadDashboardCsv, downloadDashboardHtml } from './dashboardReport'
 import DashboardSidebar from './layout/DashboardSidebar'
 import './styles/dashboard.css'
 
@@ -26,6 +31,7 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [notice, setNotice] = useState('')
   const [query, setQuery] = useState('')
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [reportAction, setReportAction] = useState<'csv' | 'html' | null>(null)
 
   const heading =
     activeItem === 'Tablou de bord' ? `Bun venit, ${user.name}!` : activeItem
@@ -54,10 +60,39 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
     }
   }
 
-  function handleExport() {
-    setNotice(
-      'Exportul va fi disponibil după conectarea dashboardului la date reale.',
-    )
+  async function handleReportAction(format: 'csv' | 'html') {
+    setNotice('')
+    setReportAction(format)
+    try {
+      const [appointments, departments, doctors, patients] = await Promise.all([
+        getAppointments(),
+        getDepartments(),
+        getDoctors(),
+        getPatients(),
+      ])
+      const reportOptions = {
+        appointments,
+        departments,
+        doctors,
+        patients,
+        generatedAt: new Date(),
+        generatedBy: user.name,
+      }
+
+      if (format === 'csv') {
+        downloadDashboardCsv(reportOptions)
+        setNotice('Raportul CSV cu datele actuale ale clinicii a fost descărcat.')
+      } else {
+        downloadDashboardHtml(reportOptions)
+        setNotice('Raportul HTML a fost descărcat. Îl poți deschide și imprima sau salva ca PDF.')
+      }
+    } catch (error) {
+      setNotice(error instanceof Error
+        ? error.message
+        : 'Raportul nu a putut fi generat. Încearcă din nou.')
+    } finally {
+      setReportAction(null)
+    }
   }
 
   return (
@@ -153,14 +188,16 @@ export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
               <button
                 className="secondary-action"
                 type="button"
-                onClick={handleExport}>
-                Exportă raportul <span aria-hidden="true">↓</span>
+                onClick={() => void handleReportAction('csv')}
+                disabled={reportAction !== null}>
+                {reportAction === 'csv' ? 'Se exportă...' : 'Exportă raportul'} <span aria-hidden="true">↓</span>
               </button>
               <button
                 className="primary-action"
                 type="button"
-                onClick={handleExport}>
-                Generează raport <span aria-hidden="true">▤</span>
+                onClick={() => void handleReportAction('html')}
+                disabled={reportAction !== null}>
+                {reportAction === 'html' ? 'Se generează...' : 'Generează raport'} <span aria-hidden="true">▤</span>
               </button>
             </div>}
           </div>
